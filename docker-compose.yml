@@ -1,0 +1,22 @@
+version: "3.1"
+services:
+  vor-env:
+    hostname: vor-env
+    build:
+      context: .
+      dockerfile: ./docker/vor.Dockerfile
+    container_name: vor-env
+    volumes:
+      - ./logs:/root/logs
+    networks:
+      vorui_devnet:
+        ipv4_address: 172.25.0.2
+    ports:
+      - "8545:8545"
+
+networks:
+  vorui_devnet:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/24

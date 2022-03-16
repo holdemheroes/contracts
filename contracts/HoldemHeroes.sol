@@ -220,8 +220,6 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         //update CRISP state
         updateCrispState(pricePerNft);
 
-        //issue refund
-        refund(totalCost);
     }
 
     /**
@@ -249,8 +247,6 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         //update CRISP state
         updateCrispState(price);
 
-        //issue refund
-        refund(priceScaled);
     }
 
     /**
@@ -329,21 +325,6 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         nextPurchaseStartingPrice = getNextStartingPrice(price);
         priceDecayStartBlock = getPriceDecayStartBlock();
         lastPurchaseBlock = block.number;
-    }
-
-    /**
-     * @dev refund issues refund if user paid too much
-     *
-     * @param actualCost uint256 actual price they should have paid
-     */
-    function refund(uint256 actualCost) internal {
-        if(msg.value > actualCost) {
-            uint256 refundAmount = msg.value - actualCost;
-            (bool sent, ) = msg.sender.call{value: refundAmount}("");
-            if (!sent) {
-                revert FailedToSendEther();
-            }
-        }
     }
 
     /*

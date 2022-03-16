@@ -12,12 +12,30 @@ const HoldemHeroes = artifacts.require("HoldemHeroes") // Loads a compiled contr
 
 contract("HoldemHeroes - init & admin", async function(accounts) {
 
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   describe('should succeed', function() {
     // deploy contract once before this set of tests
     before(async function () {
       const saleStart = Math.floor(Date.now() / 1000)
       const playingCards = await PlayingCards.new()
-      this.holdemHeroes = await HoldemHeroes.new(devAddresses.vor, devAddresses.xfund, playingCards.address, saleStart, 1, 0, 5)
+      this.holdemHeroes = await HoldemHeroes.new(
+        devAddresses.vor,
+        devAddresses.xfund,
+        playingCards.address,
+        saleStart,
+        1,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
     })
 
     it("can uploadHandRanks", async function () {
@@ -31,12 +49,28 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
     it("can withdraw eth", async function () {
       const saleStart = Math.floor(Date.now() / 1000)
       const playingCards = await PlayingCards.new()
-      const holdemHeroes = await HoldemHeroes.new(devAddresses.vor, devAddresses.xfund, playingCards.address, saleStart, 100, 0, 5)
+      const holdemHeroes = await HoldemHeroes.new(
+        devAddresses.vor,
+        devAddresses.xfund,
+        playingCards.address,
+        saleStart,
+        100,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
       await increaseBlockTime(10)
       const pricePerNft = await holdemHeroes.getNftPrice()
-      await holdemHeroes.mintNFTPreReveal( 1, [], { from: accounts[1], value: pricePerNft })
 
+      await holdemHeroes.mintNFTPreReveal( 1, { from: accounts[1], value: pricePerNft })
       const before = await web3.eth.getBalance(accounts[0])
+
+      const hehBalBefore = await web3.eth.getBalance(holdemHeroes.address)
+
+      expect( hehBalBefore ).to.be.bignumber.eq( pricePerNft )
 
       const receipt = await holdemHeroes.withdrawETH()
 
@@ -45,6 +79,10 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       const after = await web3.eth.getBalance(accounts[0])
 
       expect( after ).to.be.bignumber.gt( before )
+
+      const hehBalAfter = await web3.eth.getBalance(holdemHeroes.address)
+
+      expect( hehBalAfter ).to.be.bignumber.eq( new BN(0) )
     })
 
     it("can reveal", async function () {
@@ -90,20 +128,6 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       )
     })
 
-    it("can set post reveal mint price", async function () {
-      const priceBefore = await this.holdemHeroes.POST_REVEAL_MINT_PRICE()
-      const newPrice = 100
-      const receipt = await this.holdemHeroes.setPostRevealMintPrice(newPrice)
-      expectEvent(receipt, "PostRevealMintPriceSet", {
-        owner: accounts[0],
-        oldPrice: priceBefore,
-        newPrice: new BN(newPrice)
-      })
-
-      const priceAfter = await this.holdemHeroes.POST_REVEAL_MINT_PRICE()
-      expect( priceAfter ).to.be.bignumber.eq( new BN(newPrice) )
-    })
-
     it("...", async function () {
       expect(true).to.equal(true)
     })
@@ -114,7 +138,19 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
     beforeEach(async function () {
       const saleStart = Math.floor(Date.now() / 1000)
       const playingCards = await PlayingCards.new()
-      this.holdemHeroes = await HoldemHeroes.new(devAddresses.vor, devAddresses.xfund, playingCards.address, saleStart, 100, 0, 5)
+      this.holdemHeroes = await HoldemHeroes.new(
+        devAddresses.vor,
+        devAddresses.xfund,
+        playingCards.address,
+        saleStart,
+        100,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
     })
 
     it("only owner can uploadHandRanks", async function () {
@@ -195,23 +231,12 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       )
     })
 
-    it("only admin can set post reveal mint price", async function () {
-
-      const priceBefore = await this.holdemHeroes.POST_REVEAL_MINT_PRICE()
-
-      await expectRevert(
-        this.holdemHeroes.setPostRevealMintPrice(100, { from: accounts[1]}),
-        "Ownable: caller is not the owner",
-      )
-      const priceAfter = await this.holdemHeroes.POST_REVEAL_MINT_PRICE()
-      expect( priceAfter ).to.be.bignumber.eq( priceBefore )
-    })
-
     it("batch can only be revealed once", async function () {
       const hands = getHandsForUpload()
       await increaseBlockTime(110)
       // reveal 0
       await this.holdemHeroes.reveal(hands[0], 0, "")
+
       // send batch 0 with batch Id 1
       await expectRevert(
         this.holdemHeroes.reveal(hands[0], 1, ""),

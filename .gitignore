@@ -108,9 +108,6 @@ dist
 .vscode
 .idea
 
-data/vordev/nft_dump
 data/svgs
+data/networks/vordev/nft_dump
 build
-
-# Ignore for now until final deployment
-data

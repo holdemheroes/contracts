@@ -256,7 +256,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @param _keyHash bytes32 key hash of the VOR Oracle that will handle the request
      * @param _fee uint256 xFUND fee to pay the VOR Oracle
      */
-    function beginDistribution(bytes32 _keyHash, uint256 _fee) public canDistribute onlyOwner {
+    function beginDistribution(bytes32 _keyHash, uint256 _fee) public onlyOwner canDistribute {
         _increaseVorCoordinatorAllowance(_fee);
         bytes32 requestId = requestRandomness(_keyHash, _fee, uint256(blockhash(block.number-10)));
         emit DistributionBegun(requestId, msg.sender);
@@ -267,7 +267,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @dev of the fulfillRandomness function failing. It can only be called by the contract owner
      * @dev and should only be called if beginDistribution failed.
      */
-    function fallbackDistribution() public canDistribute onlyOwner {
+    function fallbackDistribution() public onlyOwner canDistribute {
         uint256 sourceBlock = revealBlock;
 
         // Just a sanity check (EVM only stores last 256 block hashes)

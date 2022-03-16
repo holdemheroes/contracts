@@ -47,13 +47,6 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
     ///@notice controls price decay. 59.18-decimal fixed-point
     int256 public immutable priceHalflife;
 
-    /// ---------------------------------
-    /// ------- CRISP ERRORS  -----------
-    /// ---------------------------------
-
-    error InsufficientPayment();
-    error FailedToSendEther();
-
     /*
      * EVENTS
      */
@@ -208,9 +201,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         uint256 pricePerNftScaled = uint256(pricePerNft.toInt());
         uint256 totalCost = pricePerNftScaled * numberOfNfts;
 
-        if (msg.value < totalCost) {
-            revert InsufficientPayment();
-        }
+        require(msg.value >= totalCost, "eth value incorrect");
 
         for (uint i = 0; i < numberOfNfts; i++) {
             uint mintIndex = totalSupply();
@@ -238,9 +229,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         int256 price = getNftPrice();
         uint256 priceScaled = uint256(price.toInt());
 
-        if (msg.value < priceScaled) {
-            revert InsufficientPayment();
-        }
+        require(msg.value >= priceScaled, "eth value incorrect");
 
         _safeMint(msg.sender, tokenId);
 

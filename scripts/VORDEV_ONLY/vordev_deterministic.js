@@ -19,9 +19,14 @@ module.exports = async function(callback) {
     const contractAddresses = utils.getContractAddresses()
 
     const saleStart = Math.floor(Date.now() / 1000)
-    const whitelistTime = 0
     const revealTime = 5
     const maxMintable = 1326
+
+    const targetBlocksPerSale = 5
+    const saleHalflife = 700
+    const priceSpeed = 1
+    const priceHalflife = 100
+    const startingPrice = web3.utils.toWei("0.01", "ether")
 
     console.log("deploy PlayingCards")
     const playingCards = await new PlayingCards()
@@ -35,8 +40,12 @@ module.exports = async function(callback) {
       playingCards.address,
       saleStart,
       revealTime,
-      whitelistTime,
-      maxMintable)
+      maxMintable,
+      targetBlocksPerSale,
+      saleHalflife,
+      priceSpeed,
+      priceHalflife,
+      startingPrice)
 
     console.log("HEH deployed to", holdemHeroes.address)
 

@@ -8,10 +8,16 @@ module.exports = function(deployer, network) {
   deployer.then(async () => {
 
     // TODO - SET THESE VALUES FOR TARGET NETWORK
-    const saleStart = Math.floor(Date.now() / 1000) + 18000 // 2 hours from now
+    const saleStart = Math.floor(Date.now() / 1000) + 18000 // 3 hours from now
     const timeUntilReveal = 180000 // 3 hours for Rinkeby
-    const whitelistTime = 600 // 10 minutes
-    const maxNftsPerTxOrAddress = 1326 // Rinkeby/Vordev ONLY!! For MN, use 7
+    const maxNftsPerTxOrAddress = 1326 // 1326 for Rinkeby/Vordev ONLY. For MN, use 6
+
+    // CRISP
+    const targetBlocksPerSale = 5
+    const saleHalflife = 700
+    const priceSpeed = 1
+    const priceHalflife = 100
+    const startingPrice = web3.utils.toWei("0.22", "ether")
 
     await deployer.deploy(
       HoldemHeroes,
@@ -20,8 +26,12 @@ module.exports = function(deployer, network) {
       contractAddresses[network].playing_cards,
       saleStart,
       timeUntilReveal,
-      whitelistTime,
-      maxNftsPerTxOrAddress
+      maxNftsPerTxOrAddress,
+      targetBlocksPerSale,
+      saleHalflife,
+      priceSpeed,
+      priceHalflife,
+      startingPrice
     )
 
     if(contractAddresses[network]) {

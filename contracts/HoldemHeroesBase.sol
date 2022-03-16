@@ -69,7 +69,12 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
     constructor(uint256 _saleStartTime, uint256 _revealSeconds, address _playingCards)
     ERC721("Holdem Heroes", "HEH")
     Ownable() {
-        REVEAL_TIMESTAMP = _saleStartTime + _revealSeconds;
+        if (_saleStartTime >= block.timestamp) {
+            REVEAL_TIMESTAMP = _saleStartTime + _revealSeconds;
+        } else {
+            REVEAL_TIMESTAMP = block.timestamp + _revealSeconds;
+        }
+
         REVEALED = false;
         RANKS_UPLOADED = false;
         handUploadId = 0;

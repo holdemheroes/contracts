@@ -12,35 +12,30 @@ const PlayingCards = artifacts.require("PlayingCards") // Loads a compiled contr
 const HoldemHeroes = artifacts.require("HoldemHeroesTestableDistribution") // Loads a compiled contract
 
 contract("HoldemHeroes - getters should fail", async function(accounts) {
+
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   // deploy contract once before this set of tests
   before(async function () {
     const saleStart = Math.floor(Date.now() / 1000)
     this.playingCards = await PlayingCards.new()
-    this.holdemHeroes = await HoldemHeroes.new(devAddresses.vor, devAddresses.xfund, this.playingCards.address, saleStart, 1, 0, 5)
-  })
-
-  describe("card getters - should fail", function() {
-    it( "getCardAsString cardId must be valid", async function () {
-      try {
-        await this.holdemHeroes.getCardAsString(99)
-      } catch(e) {
-        const errorFound = e.message.match("invalid cardId")
-        expect(errorFound).to.not.be.equal(null)
-      }
-    })
-
-    it( "getCardAsSvg cardId must be valid", async function () {
-      try {
-        await this.holdemHeroes.getCardAsSvg(99)
-      } catch(e) {
-        const errorFound = e.message.match("invalid cardId")
-        expect(errorFound).to.not.be.equal(null)
-      }
-    })
-
-    it( "...", async function () {
-      expect( true ).to.equal( true )
-    } )
+    this.holdemHeroes = await HoldemHeroes.new(
+      devAddresses.vor,
+      devAddresses.xfund,
+      this.playingCards.address,
+      saleStart,
+      1,
+      5,
+      targetBlocksPerSale,
+      saleHalflife,
+      priceSpeed,
+      priceHalflife,
+      startingPrice
+    )
   })
 
   describe("hand getters - should fail", function() {

@@ -257,7 +257,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
 
     it("mintNFTPreReveal must send correct value", async function () {
       await mineOneBlock()
-      
+
       const saleStart = Math.floor(Date.now() / 1000)
       const holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,

@@ -26,6 +26,12 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
 
   const flopRandomness = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
 
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   describe('should succeed', function() {
     before(async function () {
       const saleStart = Math.floor(Date.now() / 1000)
@@ -33,7 +39,19 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
 
-      this.holdemHeroes = await HoldemHeroes.new(this.vor.address, this.xfund.address, this.playingCards.address, saleStart, 1, 0, 5)
+      this.holdemHeroes = await HoldemHeroes.new(
+        this.vor.address,
+        this.xfund.address,
+        this.playingCards.address,
+        saleStart,
+        1,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
 
       this.pokerHandEvaluator = await PokerHandEvaluator.new(pheSubFee)
       this.texasHoldem = await TexasHoldemV1.new(
@@ -217,7 +235,19 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
-      this.holdemHeroes = await HoldemHeroes.new(this.vor.address, this.xfund.address, this.playingCards.address, saleStart, 1, 0, 5)
+      this.holdemHeroes = await HoldemHeroes.new(
+        this.vor.address,
+        this.xfund.address,
+        this.playingCards.address,
+        saleStart,
+        1,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
 
       this.pokerHandEvaluator = await PokerHandEvaluator.new(pheSubFee)
       this.texasHoldem = await TexasHoldemV1.new(
@@ -291,7 +321,19 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
-      this.holdemHeroes = await HoldemHeroes.new(this.vor.address, this.xfund.address, this.playingCards.address, saleStart, 1, 0, 5 )
+      this.holdemHeroes = await HoldemHeroes.new(
+        this.vor.address,
+        this.xfund.address,
+        this.playingCards.address,
+        saleStart,
+        1,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
 
       this.pokerHandEvaluator = await PokerHandEvaluator.new( pheSubFee )
       this.texasHoldem = await TexasHoldemV1.new(

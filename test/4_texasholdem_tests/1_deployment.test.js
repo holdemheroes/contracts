@@ -13,6 +13,13 @@ const TexasHoldemV1 = artifacts.require("TexasHoldemV1")
 const PokerHandEvaluator = artifacts.require("PokerHandEvaluator") // Loads a compiled contract
 
 contract("TexasHoldemV1 - deploy", async function(accounts) {
+
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   describe('should succeed', function() {
 
     const pheSubFee = 1
@@ -21,7 +28,19 @@ contract("TexasHoldemV1 - deploy", async function(accounts) {
       const saleStart = Math.floor(Date.now() / 1000)
       this.playingCards = await PlayingCards.new()
 
-      this.holdemHeroes = await HoldemHeroes.new(devAddresses.vor, devAddresses.xfund, this.playingCards.address, saleStart, 1, 0, 5)
+      this.holdemHeroes = await HoldemHeroes.new(
+        devAddresses.vor,
+        devAddresses.xfund,
+        this.playingCards.address,
+        saleStart,
+        1,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
       this.pokerHandEvaluator = await PokerHandEvaluator.new(pheSubFee)
       this.texasHoldem = null
     })

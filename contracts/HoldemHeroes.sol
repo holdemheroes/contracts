@@ -64,11 +64,11 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @param _saleStartTime uint256 - unix timestamp for when pre-reveal sale starts. Allows time for card/rank init
      * @param _revealSeconds uint256 - num seconds after pre-reveal sale starts that cards will be revealed and distributed
      * @param _maxNfts address - max number of NFTs a single wallet address can mint
-     * @param _targetBlocksPerSale int256
-     * @param _saleHalflife int256
-     * @param _priceSpeed int256
-     * @param _priceHalflife int256
-     * @param _startingPrice int256
+     * @param _targetBlocksPerSale int256, e.g. 100
+     * @param _saleHalflife int256, e.g. 700
+     * @param _priceSpeed int256, e.g. 1
+     * @param _priceHalflife int256, e.g. 100
+     * @param _startingPrice int256, e.g. 100
      */
     constructor(
         address _vorCoordinator,
@@ -98,24 +98,30 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         lastPurchaseBlock = block.number;
         priceDecayStartBlock = block.number;
 
+        // scale parameters
+        // see https://github.com/FrankieIsLost/CRISP/blob/master/src/test/CRISP.t.sol
+        int256 targetBlocksPerSale = PRBMathSD59x18.fromInt(
+            _targetBlocksPerSale
+        );
+
         saleHalflife = PRBMathSD59x18.fromInt(_saleHalflife);
         priceSpeed = PRBMathSD59x18.fromInt(_priceSpeed);
         priceHalflife = PRBMathSD59x18.fromInt(_priceHalflife);
+
+        int256 startingPrice = PRBMathSD59x18.fromInt(int256(_startingPrice));
+        // scale down to wei
+        int256 startingPriceWei = startingPrice.div(PRBMathSD59x18.fromInt(int256(10**18)));
 
         //calculate target EMS from target blocks per sale
         targetEMS = PRBMathSD59x18.fromInt(1).div(
             PRBMathSD59x18.fromInt(1) -
             PRBMathSD59x18.fromInt(2).pow(
-                    -PRBMathSD59x18.fromInt(_targetBlocksPerSale).div(
-                        saleHalflife
-                    )
+                -targetBlocksPerSale.div(saleHalflife)
             )
         );
         nextPurchaseStartingEMS = targetEMS;
 
-        nextPurchaseStartingPrice = PRBMathSD59x18.fromInt(
-            int256(_startingPrice)
-        );
+        nextPurchaseStartingPrice = startingPriceWei;
     }
 
     /*

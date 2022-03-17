@@ -126,18 +126,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         const cost = pricePerNft.mul(new web3.utils.BN(numToMint))
         process.stdout.write(".")
 
-        // NOTE - adjust schedule according to contract
-        // if(totalSupply <= 250) {
-        //   expect( pricePerNft ).to.be.bignumber.eq( new BN(web3.utils.toWei("0.001", "ether")) )
-        // } else if(totalSupply <= 500) {
-        //   expect( pricePerNft ).to.be.bignumber.eq( new BN(web3.utils.toWei("0.002", "ether")) )
-        // } else if(totalSupply <= 750) {
-        //   expect( pricePerNft ).to.be.bignumber.eq( new BN(web3.utils.toWei("0.005", "ether")) )
-        // } else if(totalSupply <= 1000) {
-        //   expect( pricePerNft ).to.be.bignumber.eq( new BN(web3.utils.toWei("0.008", "ether")) )
-        // } else {
-        //   expect( pricePerNft ).to.be.bignumber.eq( new BN(web3.utils.toWei("0.01", "ether")) )
-        // }
+        // ToDo - implement test strategy for CRISP pricing
 
         const m = i % accounts.length
 

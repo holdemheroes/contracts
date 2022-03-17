@@ -4,7 +4,7 @@ const utils = require('./utils')
 const netConfigs = require("../config.json")
 
 module.exports = function(deployer, network) {
-  const contractAddresses = utils.getContractAddresses()
+  const contractAddresses = utils.getContractAddresses(network)
   deployer.then(async () => {
 
     let parentHeh
@@ -46,6 +46,6 @@ module.exports = function(deployer, network) {
       }
     }
 
-    utils.writeContractAddresses(contractAddresses)
+    utils.writeContractAddresses(contractAddresses, network)
   })
 }

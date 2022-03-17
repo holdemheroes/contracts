@@ -1,17 +1,24 @@
 const fs = require('fs')
-const path = require("path")
 
 module.exports = {
-  getContractAddresses: () => {
+  getContractAddresses: (network) => {
+    let utSuffix = ""
+    if(network === "soliditycoverage" || network === "test") {
+      utSuffix = "UnitTests"
+    }
     try {
-      return JSON.parse(fs.readFileSync(`${process.cwd()}/data/contractAddresses.json`).toString())
+      return JSON.parse(fs.readFileSync(`${process.cwd()}/data/contractAddresses${utSuffix}.json`).toString())
     } catch (e) {
       return {}
     }
   },
-  writeContractAddresses: (contractAddresses) => {
+  writeContractAddresses: (contractAddresses, network) => {
+    let utSuffix = ""
+    if(network === "soliditycoverage" || network === "test") {
+      utSuffix = "UnitTests"
+    }
     fs.writeFileSync(
-      `${process.cwd()}/data/contractAddresses.json`,
+      `${process.cwd()}/data/contractAddresses${utSuffix}.json`,
       JSON.stringify(contractAddresses, null, 2) // Indent 2 spaces
     )
   }

@@ -29,7 +29,7 @@ module.exports = async function(callback) {
     const startingPrice = web3.utils.toWei("0.01", "ether")
 
     console.log("deploy PlayingCards")
-    const playingCards = await new PlayingCards()
+    const playingCards = await PlayingCards.new()
 
     console.log("PlayingCards deployed to", playingCards.address)
 
@@ -45,7 +45,8 @@ module.exports = async function(callback) {
       saleHalflife,
       priceSpeed,
       priceHalflife,
-      startingPrice)
+      startingPrice
+    )
 
     console.log("HEH deployed to", holdemHeroes.address)
 

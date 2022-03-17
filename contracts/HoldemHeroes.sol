@@ -98,20 +98,24 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         lastPurchaseBlock = block.number;
         priceDecayStartBlock = block.number;
 
-        saleHalflife = _saleHalflife;
-        priceSpeed = _priceSpeed;
-        priceHalflife = _priceHalflife;
+        saleHalflife = PRBMathSD59x18.fromInt(_saleHalflife);
+        priceSpeed = PRBMathSD59x18.fromInt(_priceSpeed);
+        priceHalflife = PRBMathSD59x18.fromInt(_priceHalflife);
 
         //calculate target EMS from target blocks per sale
         targetEMS = PRBMathSD59x18.fromInt(1).div(
             PRBMathSD59x18.fromInt(1) -
             PRBMathSD59x18.fromInt(2).pow(
-                -_targetBlocksPerSale.div(saleHalflife)
+                    -PRBMathSD59x18.fromInt(_targetBlocksPerSale).div(
+                        saleHalflife
+                    )
             )
         );
         nextPurchaseStartingEMS = targetEMS;
 
-        nextPurchaseStartingPrice = _startingPrice;
+        nextPurchaseStartingPrice = PRBMathSD59x18.fromInt(
+            int256(_startingPrice)
+        );
     }
 
     /*

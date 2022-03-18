@@ -44,6 +44,18 @@ module.exports = async function(callback) {
     )
   }
 
+  console.log("Simulation Parameters")
+  console.log("---------------------")
+  console.log(`targetBlocksPerSale: ${targetBlocksPerSale}`)
+  console.log(`saleHalflife:        ${saleHalflife}`)
+  console.log(`priceSpeed:          ${priceSpeed}`)
+  console.log(`priceHalflife:       ${priceHalflife}`)
+  console.log(`startingPrice:       ${startingPrice}`)
+  console.log(`priceThreshold:      ${priceThreshold}`)
+  console.log("")
+  console.log("Start simulation")
+  console.log("")
+
   try {
     const startPriceWei = web3.utils.toWei(String(startingPrice), "ether")
 
@@ -99,6 +111,8 @@ module.exports = async function(callback) {
 
     }
 
+    console.log("Simulation finished")
+    callback()
 
   } catch(e) {
     console.log(e)

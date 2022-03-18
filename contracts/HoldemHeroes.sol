@@ -139,7 +139,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
     }
 
     ///@notice get quote for purchasing in current block, decaying price as needed. Returns 59.18-decimal fixed-point
-    function getNftPrice() public view returns (int256 result) {
+    function _getNftPrice() internal view returns (int256 result) {
         if (block.number <= priceDecayStartBlock) {
             result = nextPurchaseStartingPrice;
         }
@@ -150,6 +150,12 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
             int256 decay = (-decayInterval).div(priceHalflife).exp();
             result = nextPurchaseStartingPrice.mul(decay);
         }
+    }
+
+    ///@notice get quote for purchasing in current block, decaying price as needed. Returns uint256
+    function getNftPrice() public view returns (uint256 result) {
+        int256 pricePerNft = _getNftPrice();
+        result = uint256(pricePerNft.toInt());
     }
 
     ///@notice Get starting price for next purchase before time decay. Returns 59.18-decimal fixed-point
@@ -207,14 +213,14 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         require(balanceOf(msg.sender) + numberOfNfts <= MAX_PER_ADDRESS_OR_TX, "mint limit reached");
         require(totalSupply() + numberOfNfts <= MAX_NFT_SUPPLY, "exceeds supply");
 
-        int256 pricePerNft = getNftPrice();
+        int256 pricePerNft = _getNftPrice();
         uint256 pricePerNftScaled = uint256(pricePerNft.toInt());
         uint256 totalCost = pricePerNftScaled * numberOfNfts;
 
         require(msg.value >= totalCost, "eth value incorrect");
 
-        for (uint i = 0; i < numberOfNfts; i++) {
-            uint mintIndex = totalSupply();
+        for (uint256 i = 0; i < numberOfNfts; i++) {
+            uint256 mintIndex = totalSupply();
             _safeMint(msg.sender, mintIndex);
         }
 
@@ -236,7 +242,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         require(startingIndex > 0, "not distributed");
         require(tokenId >= 0 && tokenId < MAX_NFT_SUPPLY, "invalid tokenId");
 
-        int256 price = getNftPrice();
+        int256 price = _getNftPrice();
         uint256 priceScaled = uint256(price.toInt());
 
         require(msg.value >= priceScaled, "eth value incorrect");

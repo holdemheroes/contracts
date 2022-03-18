@@ -36,7 +36,7 @@ EXPOSE 8545
 
 # default cmd to set up Ganache, deploy contracts and run VOR Oracle node
 CMD rm -f /root/logs/ganache.log && rm -f /root/logs/oracle.log && \
-    npx ganache-cli --deterministic --networkId 696969 --chainId 696969 --accounts 20 -e 1000 -h 0.0.0.0 2>&1 | tee /root/logs/ganache.log & \
+    npx ganache-cli --deterministic --networkId 696969 --chainId 696969 --accounts 20 -e 1000 -h 0.0.0.0 --allowUnlimitedContractSize true 2>&1 | tee /root/logs/ganache.log & \
     until nc -z 127.0.0.1 8545; do sleep 0.5; echo "wait for ganache"; done && \
     echo "deploying VOR contracts, please wait..." && \
     npx truffle deploy --network=develop >> /root/logs/ganache.log && \

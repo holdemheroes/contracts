@@ -22,11 +22,11 @@ module.exports = async function(callback) {
     const revealTime = 5
     const maxMintable = 1326
 
-    const targetBlocksPerSale = 5
+    const targetBlocksPerSale = 1
     const saleHalflife = 700
     const priceSpeed = 1
     const priceHalflife = 100
-    const startingPrice = web3.utils.toWei("0.01", "ether")
+    const startingPrice = web3.utils.toWei("0.0000000001", "ether")
 
     console.log("deploy PlayingCards")
     const playingCards = await PlayingCards.new()
@@ -51,6 +51,7 @@ module.exports = async function(callback) {
     console.log("HEH deployed to", holdemHeroes.address)
 
     contractAddresses[networkName] = {
+      playing_cards: playingCards.address,
       holdem_heroes_nft: holdemHeroes.address,
       xfund: netConfigs.networks[networkName].addresses.xfund,
       vor: netConfigs.networks[networkName].addresses.vor,

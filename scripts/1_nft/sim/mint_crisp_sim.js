@@ -8,15 +8,15 @@ module.exports = async function(callback) {
   // ----------------------------------
 
   // CRISP specific
-  const targetBlocksPerSale = 47 // Ideal time between mints
-  const saleHalflife = 470      // CRISP example sets to 700
+  const targetBlocksPerSale = 100 // Ideal time between mints
+  const saleHalflife = 700      // CRISP example sets to 700
   const priceSpeed = 1           // CRISP example sets to 1
-  const priceHalflife = 470     // CRISP example sets to 100
-  const startingPrice = 1     // Start price in ETH. Will be converted to wei in the script
+  const priceHalflife = 100     // CRISP example sets to 100
+  const startingPrice = 100    // Start price in ETH. Will be converted to wei in the script
 
   // Simulation variables
-  const blocksToMine = 47     // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
-  const priceThreshold = 5.0 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
+  const blocksToMine = 50     // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
+  const priceThreshold = 2.0 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
                              // the simulation will mine blocks until the price falls below this EXAMPLE WAS 2.0
 
   // HEH reveal/mint (no real need to change these for the simulation)

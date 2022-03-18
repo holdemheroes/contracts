@@ -109,8 +109,6 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         priceHalflife = PRBMathSD59x18.fromInt(_priceHalflife);
 
         int256 startingPrice = PRBMathSD59x18.fromInt(int256(_startingPrice));
-        // scale down to wei
-        int256 startingPriceWei = startingPrice.div(PRBMathSD59x18.fromInt(int256(10**18)));
 
         //calculate target EMS from target blocks per sale
         targetEMS = PRBMathSD59x18.fromInt(1).div(
@@ -119,9 +117,10 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
                 -targetBlocksPerSale.div(saleHalflife)
             )
         );
+
         nextPurchaseStartingEMS = targetEMS;
 
-        nextPurchaseStartingPrice = startingPriceWei;
+        nextPurchaseStartingPrice = startingPrice;
     }
 
     /*

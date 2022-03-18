@@ -15,6 +15,7 @@ module.exports = async function(callback) {
   const startingPrice = 0.22     // Start price in ETH. Will be converted to wei in the script
 
   // Simulation variables
+  const blocksToMine = 0     // number of additional blocks to mine between mint transactions
   const priceThreshold = 2.0 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
                              // the simulation will mine blocks until the price falls below this
 
@@ -52,6 +53,7 @@ module.exports = async function(callback) {
   console.log(`priceHalflife:       ${priceHalflife}`)
   console.log(`startingPrice:       ${startingPrice}`)
   console.log(`priceThreshold:      ${priceThreshold}`)
+  console.log(`blocksToMine:        ${blocksToMine}`)
   console.log("")
   console.log("Start simulation")
   console.log("")
@@ -108,6 +110,14 @@ module.exports = async function(callback) {
       // otherwise minters may run out of ETH during est
       await holdemHeroes.withdrawETH( { from: admin })
       await web3.eth.sendTransaction({to:accounts[m], from: admin, value: pricePerNft})
+
+      if(blocksToMine > 0) {
+        for(let j = 0; j < blocksToMine; j += 1) {
+          process.stdout.write(".")
+          await mineOneBlock()
+        }
+        console.log("")
+      }
 
     }
 

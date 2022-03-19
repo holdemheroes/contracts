@@ -15,7 +15,7 @@ module.exports = async function(callback) {
   const startingPrice = 0.5    // Start price in ETH. Will be converted to wei in the script
 
   // Simulation variables
-  const blocksToMine = 44    // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
+  const blocksToMine = 50    // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
   const priceThreshold = 1 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
                              // the simulation will mine blocks until the price falls below this EXAMPLE WAS 2.0
 

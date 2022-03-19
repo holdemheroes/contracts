@@ -16,7 +16,7 @@ module.exports = async function(callback) {
 
   // Simulation variables
   const blocksToMine = 47    // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
-  const priceThreshold = 0.5 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
+  const priceThreshold = 1 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
                              // the simulation will mine blocks until the price falls below this EXAMPLE WAS 2.0
 
   // HEH reveal/mint (no real need to change these for the simulation)

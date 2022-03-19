@@ -8,7 +8,7 @@ module.exports = async function(callback) {
   // ----------------------------------
 
   // CRISP specific
-  const targetBlocksPerSale = 3 // Ideal time between mints
+  const targetBlocksPerSale = 2 // Ideal time between mints
   const saleHalflife = 94     // CRISP example sets to 700
   const priceSpeed = 1           // CRISP example sets to 1
   const priceHalflife = 94     // CRISP example sets to 100

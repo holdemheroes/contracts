@@ -11,8 +11,8 @@ module.exports = async function(callback) {
   const targetBlocksPerSale = 47 // Ideal time between mints
   const saleHalflife = 700      // CRISP example sets to 700
   const priceSpeed = 1           // CRISP example sets to 1
-  const priceHalflife = 100     // CRISP example sets to 100
-  const startingPrice = 0.22    // Start price in ETH. Will be converted to wei in the script
+  const priceHalflife = 700     // CRISP example sets to 100
+  const startingPrice = 1    // Start price in ETH. Will be converted to wei in the script
 
   // Simulation variables
   const blocksToMine = 47     // number of additional blocks to mine between mint transactions EXAMPLE WAS 0

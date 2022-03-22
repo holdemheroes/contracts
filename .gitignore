@@ -112,3 +112,4 @@ data/svgs
 data/networks/vordev/nft_dump
 build
 data/contractAddressesUnitTests.json
+data/tmp

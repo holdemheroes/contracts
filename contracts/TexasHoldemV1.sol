@@ -185,7 +185,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     }
 
     /**
-     * @dev withdrawETH allows contract owner to withdraw ether
+     * @dev withdrawHouse allows contract owner to withdraw ether
      */
     function withdrawHouse() external onlyOwner nonReentrant {
         require(houseCut > 0, "nothing to withdraw");

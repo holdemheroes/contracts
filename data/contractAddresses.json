@@ -5,15 +5,17 @@
     "vor": "0x6d5Ba663dDCa573557c8420256Dc85F31D9762B0",
     "provenance_ipfs_hash": "QmeMd9SemndHMgQeERkZhLHYErpxcx4LjDZfPMUj39rWBd",
     "hand_evaluator": "0x17eED6EDA8cfB4B986320a854A54Fa57cFe67FBD",
-    "texas_holdem_v1": "0xca25aB8b9da0ab88F86d2838f9CA78281eA01f6E"
+    "texas_holdem_v1": "0xca25aB8b9da0ab88F86d2838f9CA78281eA01f6E",
+    "playing_cards": "0xCeC6aA80F5815A42c497B1Ca46d93256e21ea220"
   },
   "vordev": {
-    "holdem_heroes_nft": "0xD86C8F0327494034F60e25074420BcCF560D5610",
+    "holdem_heroes_nft": "0x4bf749ec68270027C5910220CEAB30Cc284c7BA2",
     "xfund": "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab",
     "vor": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
     "provenance_ipfs_hash": "QmV4XHNB2BaukmbLwaqFnrJNsdHSbR4aTFX6NUXUWkM713",
     "hand_evaluator": "0x4bf3A7dFB3b76b5B3E169ACE65f888A4b4FCa5Ee",
-    "texas_holdem_v1": "0xd99748782d7643b00C36a4Bb296C4A099dF98Ff3"
+    "texas_holdem_v1": "0xd99748782d7643b00C36a4Bb296C4A099dF98Ff3",
+    "playing_cards": "0xD86C8F0327494034F60e25074420BcCF560D5610"
   },
   "polygon_mumbai": {
     "provenance_ipfs_hash": "QmeMd9SemndHMgQeERkZhLHYErpxcx4LjDZfPMUj39rWBd",

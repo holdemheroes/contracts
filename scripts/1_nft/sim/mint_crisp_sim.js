@@ -8,15 +8,15 @@ module.exports = async function(callback) {
   // ----------------------------------
 
   // CRISP specific
-  const targetBlocksPerSale = 6 // Ideal time between mints
-  const saleHalflife = 1     // CRISP example sets to 700
+  const targetBlocksPerSale = 9 // Ideal time between mints
+  const saleHalflife = 81     // CRISP example sets to 700
   const priceSpeed = 1           // CRISP example sets to 1
-  const priceHalflife = 1    // CRISP example sets to 100
-  const startingPrice = 1    // Start price in ETH. Will be converted to wei in the script
+  const priceHalflife = 81    // CRISP example sets to 100
+  const startingPrice = 0.01    // Start price in ETH. Will be converted to wei in the script
 
   // Simulation variables
-  const blocksToMine = 0    // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
-  const priceThreshold = 3 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
+  const blocksToMine = 10    // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
+  const priceThreshold = 0.2 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
                              // the simulation will mine blocks until the price falls below this EXAMPLE WAS 2.0
 
   // HEH reveal/mint (no real need to change these for the simulation)
@@ -111,8 +111,10 @@ module.exports = async function(callback) {
       await holdemHeroes.withdrawETH( { from: admin })
       await web3.eth.sendTransaction({to:accounts[m], from: admin, value: pricePerNft})
 
-      if(blocksToMine > 0) {
-        for(let j = 0; j < blocksToMine; j += 1) {
+      const randBlockToMin = Math.floor(Math.random() * blocksToMine)
+
+      if(randBlockToMin > 0) {
+        for(let j = 0; j < randBlockToMin; j += 1) {
           process.stdout.write(".")
           await mineOneBlock()
         }

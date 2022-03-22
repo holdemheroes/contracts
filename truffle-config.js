@@ -22,7 +22,7 @@ require('dotenv').config()
 // const TestRPC = require("ganache-cli")
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
-const { ETH_PKEY_RINKEBY, ETH_PKEY_MAINNET, INFURA_PROJECT_ID, ETHERSCAN_API_KEY } = process.env
+const { ETH_PKEY, INFURA_PROJECT_ID, ETHERSCAN_API_KEY } = process.env
 
 module.exports = {
   /**
@@ -50,11 +50,12 @@ module.exports = {
       network_id: "696969", // Any network (default: none)
       skipDryRun: true,
       networkCheckTimeout: 999999,
+      port: 8545,
     },
     rinkeby: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY_RINKEBY],
+          privateKeys: [ETH_PKEY],
           providerOrUrl: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "4",
@@ -65,7 +66,7 @@ module.exports = {
     mainnet: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY_MAINNET],
+          privateKeys: [ETH_PKEY],
           providerOrUrl: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "1",
@@ -74,7 +75,7 @@ module.exports = {
     polygon_mumbai: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY_RINKEBY],
+          privateKeys: [ETH_PKEY],
           providerOrUrl: `https://polygon-mumbai.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "80001",

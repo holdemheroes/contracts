@@ -16,11 +16,29 @@ const xFUND = artifacts.require("MockERC20")
 contract("TexasHoldemV1 - admin", async function(accounts) {
   const pheSubFee = 1
 
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   before(async function () {
     const saleStart = Math.floor(Date.now() / 1000)
     this.xFUND = await xFUND.new() // for testing increaseVorCoordinatorAllowance
     this.playingCards = await PlayingCards.new()
-    this.holdemHeroes = await HoldemHeroes.new(devAddresses.vor, this.xFUND.address, this.playingCards.address, saleStart, 1, 0, 5)
+    this.holdemHeroes = await HoldemHeroes.new(
+      devAddresses.vor,
+      this.xFUND.address,
+      this.playingCards.address,
+      saleStart,
+      1,
+      5,
+      targetBlocksPerSale,
+      saleHalflife,
+      priceSpeed,
+      priceHalflife,
+      startingPrice
+    )
     this.pokerHandEvaluator = await PokerHandEvaluator.new(pheSubFee)
     this.texasHoldem = await TexasHoldemV1.new(
       this.xFUND.address,

@@ -4,7 +4,7 @@ const utils = require('./utils')
 const netConfigs = require( "../config.json" )
 
 module.exports = function(deployer, network) {
-  const contractAddresses = utils.getContractAddresses()
+  const contractAddresses = utils.getContractAddresses(network)
 
   const maxConcurrentGames = 5
   const roundTime = 3600
@@ -26,6 +26,6 @@ module.exports = function(deployer, network) {
       contractAddresses[network].texas_holdem_v1 = TexasHoldemV1.address
     }
 
-    utils.writeContractAddresses(contractAddresses)
+    utils.writeContractAddresses(contractAddresses, network)
   })
 }

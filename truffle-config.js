@@ -22,7 +22,7 @@ require('dotenv').config()
 // const TestRPC = require("ganache-cli")
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
-const { ETH_PKEY_RINKEBY, ETH_PKEY_MAINNET, INFURA_PROJECT_ID, ETHERSCAN_API_KEY } = process.env
+const { ETH_PKEY, INFURA_PROJECT_ID, ETHERSCAN_API_KEY } = process.env
 
 module.exports = {
   /**
@@ -36,6 +36,11 @@ module.exports = {
    */
 
   networks: {
+    development: {
+     host: "127.0.0.1",     // Localhost (default: none)
+     port: 7545,            // Standard Ethereum port (default: none)
+     network_id: "*",       // Any network (default: none)
+    },
     vordev: {
       provider: () =>
         new HDWalletProvider(
@@ -45,11 +50,12 @@ module.exports = {
       network_id: "696969", // Any network (default: none)
       skipDryRun: true,
       networkCheckTimeout: 999999,
+      port: 8545,
     },
     rinkeby: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY_RINKEBY],
+          privateKeys: [ETH_PKEY],
           providerOrUrl: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "4",
@@ -60,7 +66,7 @@ module.exports = {
     mainnet: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY_MAINNET],
+          privateKeys: [ETH_PKEY],
           providerOrUrl: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "1",
@@ -69,7 +75,7 @@ module.exports = {
     polygon_mumbai: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY_RINKEBY],
+          privateKeys: [ETH_PKEY],
           providerOrUrl: `https://polygon-mumbai.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "80001",
@@ -101,7 +107,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.8.9",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.8.12",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
         optimizer: {

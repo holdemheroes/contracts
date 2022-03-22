@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.9;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Base64.sol";
@@ -9,7 +8,6 @@ import "./interfaces/IPlayingCards.sol";
 
 
 contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
-    using SafeMath for uint256;
 
     // a start-hand combination
     struct Hand {
@@ -20,7 +18,7 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
     uint256 public constant MAX_NFT_SUPPLY = 1326; // final totalSupply of NFTs
 
     // sha256 hash of all generated and shuffled hands
-    string public constant HAND_PROVENANCE = "0x0f2f589f7a4a8f583e3053d84ac5b827445dc51d60f1fd4dcf3023ddf2507515";
+    bytes32 public constant HAND_PROVENANCE = 0x0f2f589f7a4a8f583e3053d84ac5b827445dc51d60f1fd4dcf3023ddf2507515;
 
     // start index for mapping tokenId on to handId - set during the distribution phase
     uint256 public startingIndex;
@@ -71,7 +69,12 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
     constructor(uint256 _saleStartTime, uint256 _revealSeconds, address _playingCards)
     ERC721("Holdem Heroes", "HEH")
     Ownable() {
-        REVEAL_TIMESTAMP = _saleStartTime + _revealSeconds;
+        if (_saleStartTime >= block.timestamp) {
+            REVEAL_TIMESTAMP = _saleStartTime + _revealSeconds;
+        } else {
+            REVEAL_TIMESTAMP = block.timestamp + _revealSeconds;
+        }
+
         REVEALED = false;
         RANKS_UPLOADED = false;
         handUploadId = 0;
@@ -143,37 +146,6 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
     /*
      * PUBLIC GETTERS
      */
-
-    /**
-     * @dev getCardAsString returns the string value for a card, for example "As" (Ace of Spades)
-     *
-     * @param cardId uint8 ID of the card from 0 - 51
-     * @return string
-     */
-    function getCardAsString(uint8 cardId) external view returns (string memory) {
-        return playingCards.getCardAsString(cardId);
-    }
-
-    /**
-     * @dev getCardAsSvg returns the SVG XML for a card, which can be rendered as an img src in a UI
-     *
-     * @param cardId uint8 ID of the card from 0 - 51
-     * @return string SVG XML of card
-     */
-    function getCardAsSvg(uint8 cardId) external view returns (string memory) {
-        return playingCards.getCardAsSvg(cardId);
-    }
-
-    /**
-     * @dev getCardAsComponents returns the number and suit IDs for a card, as stored in numbers and suits arrays
-     *
-     * @param cardId uint8 ID of the card from 0 - 51
-     * @return number uint8 number/figure ID of card (0 - 12)
-     * @return suit uint8 suit ID of card (0 - 3)
-     */
-    function getCardAsComponents(uint8 cardId) external view returns (uint8 number, uint8 suit) {
-        return playingCards.getCardAsComponents(cardId);
-    }
 
     /**
      * @dev getHandShape returns the shape for a given hand ID, for example "Suited" or "s"

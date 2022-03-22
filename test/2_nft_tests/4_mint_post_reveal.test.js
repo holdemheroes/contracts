@@ -12,11 +12,30 @@ const PlayingCards = artifacts.require("PlayingCards") // Loads a compiled contr
 const HoldemHeroes = artifacts.require("HoldemHeroesTestableDistribution") // Loads a compiled contract
 
 contract("HoldemHeroes - post reveal mint", async function(accounts) {
+
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   // deploy contract once before this set of tests
   before(async function () {
     const saleStart = Math.floor(Date.now() / 1000)
     this.playingCards = await PlayingCards.new()
-    this.holdemHeroes = await HoldemHeroes.new(devAddresses.vor, devAddresses.xfund, this.playingCards.address, saleStart, 1, 0, 5)
+    this.holdemHeroes = await HoldemHeroes.new(
+      devAddresses.vor,
+      devAddresses.xfund,
+      this.playingCards.address,
+      saleStart,
+      1,
+      5,
+      targetBlocksPerSale,
+      saleHalflife,
+      priceSpeed,
+      priceHalflife,
+      startingPrice
+    )
     await increaseBlockTime(10)
 
     const hands = getHandsForUpload()
@@ -28,7 +47,19 @@ contract("HoldemHeroes - post reveal mint", async function(accounts) {
   describe("post reveal minting", function() {
     it( "cannot mintNFTPostReveal if not revealed yet", async function () {
       const saleStart = Math.floor( Date.now() / 1000 )
-      const holdemHeroes = await HoldemHeroes.new( devAddresses.vor, devAddresses.xfund, this.playingCards.address, saleStart, 1, 0, 5 )
+      const holdemHeroes = await HoldemHeroes.new(
+        devAddresses.vor,
+        devAddresses.xfund,
+        this.playingCards.address,
+        saleStart,
+        1,
+        5,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
       const pricePerNft = await holdemHeroes.getNftPrice()
       await expectRevert(
         holdemHeroes.mintNFTPostReveal( 1, { from: accounts[1], value: pricePerNft } ),
@@ -62,12 +93,6 @@ contract("HoldemHeroes - post reveal mint", async function(accounts) {
       expect( nftOwner ).to.be.eq( minter )
     } )
 
-    it("getNftPrice returns correct price per NFT after revealed", async function () {
-      const postRevealPrice = await this.holdemHeroes.POST_REVEAL_MINT_PRICE()
-      const pricePerNft = await this.holdemHeroes.getNftPrice()
-      expect( pricePerNft ).to.be.bignumber.eq( postRevealPrice )
-    })
-
     it( "must mintNFTPostReveal with a valid tokenId", async function () {
       const pricePerNft = await this.holdemHeroes.getNftPrice()
       await expectRevert(
@@ -83,34 +108,14 @@ contract("HoldemHeroes - post reveal mint", async function(accounts) {
       )
     } )
 
-    // it( "cannot mintNFTPostReveal more than max", async function () {
-    //   const pricePerNft = await this.holdemHeroes.getNftPrice()
-    //   await this.holdemHeroes.mintNFTPostReveal( 1, { from: accounts[1], value: pricePerNft } )
-    //   await this.holdemHeroes.mintNFTPostReveal( 2, { from: accounts[1], value: pricePerNft } )
-    //   await this.holdemHeroes.mintNFTPostReveal( 3, { from: accounts[1], value: pricePerNft } )
-    //   await this.holdemHeroes.mintNFTPostReveal( 4, { from: accounts[1], value: pricePerNft } )
-    //   await expectRevert(
-    //     this.holdemHeroes.mintNFTPostReveal( 5, { from: accounts[1], value: pricePerNft } ),
-    //     "mint limit reached",
-    //   )
-    // } )
-
-    it( "must mintNFTPostReveal with valid tokenId", async function () {
-
-      const pricePerNft = await this.holdemHeroes.getNftPrice()
-
-      await expectRevert(
-        this.holdemHeroes.mintNFTPostReveal( 1326, { from: accounts[1], value: pricePerNft } ),
-        "invalid tokenId",
-      )
-    } )
-
     it( "must mintNFTPostReveal available tokenId", async function () {
 
       const pricePerNft = await this.holdemHeroes.getNftPrice()
 
+      await this.holdemHeroes.mintNFTPostReveal( 5, { from: accounts[1], value: pricePerNft } )
+
       await expectRevert(
-        this.holdemHeroes.mintNFTPostReveal( 1, { from: accounts[2], value: pricePerNft } ),
+        this.holdemHeroes.mintNFTPostReveal( 5, { from: accounts[2], value: pricePerNft } ),
         "ERC721: token already minted",
       )
     } )

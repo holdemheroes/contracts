@@ -1,29 +1,51 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.9;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "prb-math/contracts/PRBMathSD59x18.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@unification-com/xfund-vor/contracts/VORConsumerBase.sol";
 import "./HoldemHeroesBase.sol";
 
 
-contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumerBase  {
-    using SafeMath for uint256;
+contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
+    using PRBMathSD59x18 for int256;
 
     // max number of NFTs allowed per address
     uint256 public MAX_PER_ADDRESS_OR_TX;
     // timestamp for when public sale opens
     uint256 public SALE_START_TIMESTAMP;
-    // adjustable price to be used after hands are revealed, in case not all NFTs are sold during
-    // the pre-reveal sales. By default, this will be the last price in the getNftPrice list
-    // and can be modified by the contract owner
-    uint256 public POST_REVEAL_MINT_PRICE;
-    // timestamp before which only whitelisted addresses can mint
-    uint256 public WHITELIST_MINT_TIMESTAMP;
 
-    bytes32 public whitelistMerkleRoot;
-    bool public useWhitelist;
+    /// ---------------------------
+    /// ------- CRISP STATE -------
+    /// ---------------------------
+
+    ///@notice block on which last purchase occurred
+    uint256 public lastPurchaseBlock;
+
+    ///@notice block on which we start decaying price
+    uint256 public priceDecayStartBlock;
+
+    ///@notice Starting EMS, before time decay. 59.18-decimal fixed-point
+    int256 public nextPurchaseStartingEMS;
+
+    ///@notice Starting price for next purchase, before time decay. 59.18-decimal fixed-point
+    int256 public nextPurchaseStartingPrice;
+
+    /// ---------------------------
+    /// ---- CRISP PARAMETERS -----
+    /// ---------------------------
+
+    ///@notice EMS target. 59.18-decimal fixed-point
+    int256 public immutable targetEMS;
+
+    ///@notice controls decay of sales in EMS. 59.18-decimal fixed-point
+    int256 public immutable saleHalflife;
+
+    ///@notice controls upward price movement. 59.18-decimal fixed-point
+    int256 public immutable priceSpeed;
+
+    ///@notice controls price decay. 59.18-decimal fixed-point
+    int256 public immutable priceHalflife;
 
     /*
      * EVENTS
@@ -31,8 +53,6 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
 
     event DistributionBegun(bytes32 requestId, address sender);
     event DistributionResult(bytes32 requestId, uint256 randomness, uint256 startingIndex);
-    event PostRevealMintPriceSet(address owner, uint256 oldPrice, uint256 newPrice);
-    event WhitelistMerkleRootSet(address owner, bytes32 oldMerkleRoot, bytes32 newMerkleRoot, bool useWhitelist);
 
     /**
      * @dev constructor
@@ -43,8 +63,12 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
      * @param _playingCards address - address of Playing Cards contract
      * @param _saleStartTime uint256 - unix timestamp for when pre-reveal sale starts. Allows time for card/rank init
      * @param _revealSeconds uint256 - num seconds after pre-reveal sale starts that cards will be revealed and distributed
-     * @param _whitelistSeconds uint256 - num seconds after pre-reveal sale starts that only whitelisted addresses can mint
      * @param _maxNfts address - max number of NFTs a single wallet address can mint
+     * @param _targetBlocksPerSale int256, e.g. 100
+     * @param _saleHalflife int256, e.g. 700
+     * @param _priceSpeed int256, e.g. 1
+     * @param _priceHalflife int256, e.g. 100
+     * @param _startingPrice int256, e.g. 100
      */
     constructor(
         address _vorCoordinator,
@@ -52,8 +76,13 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
         address _playingCards,
         uint256 _saleStartTime,
         uint256 _revealSeconds,
-        uint256 _whitelistSeconds,
-        uint256 _maxNfts)
+        uint256 _maxNfts,
+        int256 _targetBlocksPerSale,
+        int256 _saleHalflife,
+        int256 _priceSpeed,
+        int256 _priceHalflife,
+        int256 _startingPrice
+    )
     VORConsumerBase(_vorCoordinator, _xfund)
     HoldemHeroesBase(_saleStartTime, _revealSeconds, _playingCards)
     {
@@ -63,74 +92,107 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
             SALE_START_TIMESTAMP = block.timestamp;
         }
 
-        WHITELIST_MINT_TIMESTAMP = SALE_START_TIMESTAMP + _whitelistSeconds;
-        useWhitelist = false;
-
         MAX_PER_ADDRESS_OR_TX = _maxNfts;
 
-        // Should be the same as the final scheduled price in getNftPrice() to begin with
-        POST_REVEAL_MINT_PRICE = 0.01 ether;
+        // CRISP
+        lastPurchaseBlock = block.number;
+        priceDecayStartBlock = block.number;
+
+        // scale parameters
+        // see https://github.com/FrankieIsLost/CRISP/blob/master/src/test/CRISP.t.sol
+        int256 targetBlocksPerSale = PRBMathSD59x18.fromInt(
+            _targetBlocksPerSale
+        );
+
+        saleHalflife = PRBMathSD59x18.fromInt(_saleHalflife);
+        priceSpeed = PRBMathSD59x18.fromInt(_priceSpeed);
+        priceHalflife = PRBMathSD59x18.fromInt(_priceHalflife);
+
+        int256 startingPrice = PRBMathSD59x18.fromInt(int256(_startingPrice));
+
+        //calculate target EMS from target blocks per sale
+        targetEMS = PRBMathSD59x18.fromInt(1).div(
+            PRBMathSD59x18.fromInt(1) -
+            PRBMathSD59x18.fromInt(2).pow(
+                -targetBlocksPerSale.div(saleHalflife)
+            )
+        );
+
+        nextPurchaseStartingEMS = targetEMS;
+
+        nextPurchaseStartingPrice = startingPrice;
     }
 
     /*
-     * ADMIN FUNCTIONS
+     * CRISP FUNCTIONS
      */
 
-    /**
-     * @dev setPostRevealMintPrice allows the contract owner to change the post reveal mint price in the event
-     * @dev that some NFTs remain unsold.
-     *
-     * @param newPrice uint256 new price in wei
-     */
-
-    function setPostRevealMintPrice(uint256 newPrice) external onlyOwner {
-        uint256 oldPrice = POST_REVEAL_MINT_PRICE;
-        POST_REVEAL_MINT_PRICE = newPrice;
-        emit PostRevealMintPriceSet(msg.sender, oldPrice, newPrice);
+    ///@notice get current EMS based on block number. Returns 59.18-decimal fixed-point
+    function getCurrentEMS() public view returns (int256 result) {
+        int256 blockInterval = int256(block.number - lastPurchaseBlock);
+        blockInterval = blockInterval.fromInt();
+        int256 weightOnPrev = PRBMathSD59x18.fromInt(2).pow(
+            -blockInterval.div(saleHalflife)
+        );
+        result = nextPurchaseStartingEMS.mul(weightOnPrev);
     }
 
-    /**
-     * @dev setWhitelistMerkleRoot allows the contract owner to change the merkle root for whitelisted
-     * @dev pre-reveal minters
-     *
-     * @param newMerkleRoot bytes32 new merkle root hash
-     */
-
-    function setWhitelistMerkleRoot(bytes32 newMerkleRoot, bool newUseWhitelist) external onlyOwner {
-        bytes32 oldRoot = whitelistMerkleRoot;
-        whitelistMerkleRoot = newMerkleRoot;
-        useWhitelist = newUseWhitelist;
-        emit WhitelistMerkleRootSet(msg.sender, oldRoot, newMerkleRoot, newUseWhitelist);
+    ///@notice get quote for purchasing in current block, decaying price as needed. Returns 59.18-decimal fixed-point
+    function _getNftPrice() internal view returns (int256 result) {
+        if (block.number <= priceDecayStartBlock) {
+            result = nextPurchaseStartingPrice;
+        }
+        //decay price if we are past decay start block
+        else {
+            int256 decayInterval = int256(block.number - priceDecayStartBlock)
+            .fromInt();
+            int256 decay = (-decayInterval).div(priceHalflife).exp();
+            result = nextPurchaseStartingPrice.mul(decay);
+        }
     }
+
+    ///@notice get quote for purchasing in current block, decaying price as needed. Returns uint256
+    function getNftPrice() public view returns (uint256 result) {
+        int256 pricePerNft = _getNftPrice();
+        result = uint256(pricePerNft.toInt());
+    }
+
+    ///@notice Get starting price for next purchase before time decay. Returns 59.18-decimal fixed-point
+    function getNextStartingPrice(int256 lastPurchasePrice)
+    public
+    view
+    returns (int256 result)
+    {
+        int256 mismatchRatio = nextPurchaseStartingEMS.div(targetEMS);
+        if (mismatchRatio > PRBMathSD59x18.fromInt(1)) {
+            result = lastPurchasePrice.mul(
+                PRBMathSD59x18.fromInt(1) + mismatchRatio.mul(priceSpeed)
+            );
+        } else {
+            result = lastPurchasePrice;
+        }
+    }
+
+    ///@notice Find block in which time based price decay should start
+    function getPriceDecayStartBlock() internal view returns (uint256 result) {
+        int256 mismatchRatio = nextPurchaseStartingEMS.div(targetEMS);
+        //if mismatch ratio above 1, decay should start in future
+        if (mismatchRatio > PRBMathSD59x18.fromInt(1)) {
+            uint256 decayInterval = uint256(
+                saleHalflife.mul(mismatchRatio.log2()).ceil().toInt()
+            );
+            result = block.number + decayInterval;
+        }
+        //else decay should start at the current block
+        else {
+            result = block.number;
+        }
+    }
+
 
     /*
      * MINT & DISTRIBUTION FUNCTIONS
      */
-
-    /**
-     * @dev getNftPrice returns the current price to mint 1 NFT
-     *
-     * @return uint256
-     */
-
-    function getNftPrice() public view returns (uint256) {
-
-        if (REVEALED && startingIndex > 0) {
-            return POST_REVEAL_MINT_PRICE;
-        }
-
-        if (totalSupply() <= 250) {
-            return 0.001 ether;
-        } else if (totalSupply() <= 500) {
-            return 0.002 ether;
-        } else if (totalSupply() <= 750) {
-            return 0.005 ether;
-        } else if (totalSupply() <= 1000) {
-            return 0.008 ether;
-        } else {
-            return 0.01 ether;
-        }
-    }
 
     /**
      * @dev mintNFTPreReveal is a public payable function which any user can call during the pre-reveal
@@ -139,28 +201,31 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
      * @dev executed during the reveal & distribution phase, via a call to VOR.
      * @dev Correct ether value is expected to pay for tokens.
      *
-     * @param numberOfNfts uint256 number of NFTs to mint in this Tx
-     * @param merkleProof bytes32[] merkle proof for whitelist check
+     * @param _numberOfNfts uint256 number of NFTs to mint in this Tx
      */
-    function mintNFTPreReveal(uint256 numberOfNfts, bytes32[] calldata merkleProof) external payable nonReentrant {
-        require(block.timestamp >= SALE_START_TIMESTAMP, "sale not started");
+    function mintNFTPreReveal(uint256 _numberOfNfts) external payable {
+        uint256 numberOfNfts = (_numberOfNfts > 0) ? _numberOfNfts : 1;
+        require(block.timestamp >= SALE_START_TIMESTAMP, "not started");
         require(totalSupply() < MAX_NFT_SUPPLY, "sold out");
-        require(block.timestamp < REVEAL_TIMESTAMP, "pre reveal sale ended");
-        require(numberOfNfts > 0, "cannot buy 0");
-        require(numberOfNfts <= MAX_PER_ADDRESS_OR_TX, "max 5 per tx");
-        require(balanceOf(msg.sender).add(numberOfNfts) <= MAX_PER_ADDRESS_OR_TX, "mint limit reached");
-        require(totalSupply().add(numberOfNfts) <= MAX_NFT_SUPPLY, "exceeds MAX_NFT_SUPPLY");
-        require(getNftPrice().mul(numberOfNfts) == msg.value, "eth value incorrect");
+        require(block.timestamp < REVEAL_TIMESTAMP, "sale ended");
+        require(numberOfNfts <= MAX_PER_ADDRESS_OR_TX, "> max per tx");
+        require(balanceOf(msg.sender) + numberOfNfts <= MAX_PER_ADDRESS_OR_TX, "mint limit reached");
+        require(totalSupply() + numberOfNfts <= MAX_NFT_SUPPLY, "exceeds supply");
 
-        if(block.timestamp <= WHITELIST_MINT_TIMESTAMP && useWhitelist) {
-            bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
-            require(verifyMerkleProof(merkleProof, whitelistMerkleRoot, leaf), "not whitelisted");
-        }
+        int256 pricePerNft = _getNftPrice();
+        uint256 pricePerNftScaled = uint256(pricePerNft.toInt());
+        uint256 totalCost = pricePerNftScaled * numberOfNfts;
 
-        for (uint i = 0; i < numberOfNfts; i++) {
-            uint mintIndex = totalSupply();
+        require(msg.value >= totalCost, "eth value incorrect");
+
+        for (uint256 i = 0; i < numberOfNfts; i++) {
+            uint256 mintIndex = totalSupply();
             _safeMint(msg.sender, mintIndex);
         }
+
+        //update CRISP state
+        updateCrispState(pricePerNft);
+
     }
 
     /**
@@ -171,13 +236,21 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
      *
      * @param tokenId uint256 NFT Token ID to purchase
      */
-    function mintNFTPostReveal(uint256 tokenId) external payable nonReentrant {
+    function mintNFTPostReveal(uint256 tokenId) external payable {
         require(REVEALED, "not revealed");
         require(startingIndex > 0, "not distributed");
         require(tokenId >= 0 && tokenId < MAX_NFT_SUPPLY, "invalid tokenId");
-        require(getNftPrice() == msg.value, "eth value incorrect");
+
+        int256 price = _getNftPrice();
+        uint256 priceScaled = uint256(price.toInt());
+
+        require(msg.value >= priceScaled, "eth value incorrect");
 
         _safeMint(msg.sender, tokenId);
+
+        //update CRISP state
+        updateCrispState(price);
+
     }
 
     /**
@@ -187,12 +260,9 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
      * @param _keyHash bytes32 key hash of the VOR Oracle that will handle the request
      * @param _fee uint256 xFUND fee to pay the VOR Oracle
      */
-    function beginDistribution(bytes32 _keyHash, uint256 _fee) public onlyOwner nonReentrant {
-        require(startingIndex == 0, "already executed");
-        require(REVEALED, "not revealed");
+    function beginDistribution(bytes32 _keyHash, uint256 _fee) public onlyOwner canDistribute {
         _increaseVorCoordinatorAllowance(_fee);
-        uint256 seed = uint256(blockhash(block.number-10));
-        bytes32 requestId = requestRandomness(_keyHash, _fee, seed);
+        bytes32 requestId = requestRandomness(_keyHash, _fee, uint256(blockhash(block.number-10)));
         emit DistributionBegun(requestId, msg.sender);
     }
 
@@ -201,14 +271,11 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
      * @dev of the fulfillRandomness function failing. It can only be called by the contract owner
      * @dev and should only be called if beginDistribution failed.
      */
-    function fallbackDistribution() public onlyOwner {
-        require(startingIndex == 0, "already executed");
-        require(REVEALED, "not revealed");
-
+    function fallbackDistribution() public onlyOwner canDistribute {
         uint256 sourceBlock = revealBlock;
 
         // Just a sanity check (EVM only stores last 256 block hashes)
-        if (block.number.sub(revealBlock) > 255) {
+        if (block.number - revealBlock > 255) {
             sourceBlock = block.number-1;
         }
 
@@ -227,10 +294,10 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
      */
     function checkAndSetStartIdx(uint256 _randomness) internal {
         // calculate based on randomness
-        startingIndex = _randomness.mod(MAX_NFT_SUPPLY-1);
+        startingIndex = _randomness % (MAX_NFT_SUPPLY-1);
         // Prevent default sequence
         if (startingIndex == 0) {
-            startingIndex = startingIndex.add(1);
+            startingIndex = 1;
         }
         if (startingIndex > 1325) {
             startingIndex = 1325;
@@ -253,31 +320,27 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, ReentrancyGuard, VORConsumer
     }
 
     /**
-     * @dev Returns true if a `leaf` can be proved to be a part of a Merkle tree
-     * defined by `root`. For this, a `proof` must be provided, containing
-     * sibling hashes on the branch from the leaf to the root of the tree. Each
-     * pair of leaves and each pair of pre-images are assumed to be sorted.
+     * @dev updateCrispState updates the CRISP parameters for dynamic pricing
+     *
+     * @param price int256 current price per NFT paid by user
      */
-    function verifyMerkleProof(
-        bytes32[] memory proof,
-        bytes32 root,
-        bytes32 leaf
-    ) internal pure returns (bool) {
-        bytes32 computedHash = leaf;
+    function updateCrispState(int256 price) internal {
+        nextPurchaseStartingEMS = getCurrentEMS() + PRBMathSD59x18.fromInt(1);
+        nextPurchaseStartingPrice = getNextStartingPrice(price);
+        priceDecayStartBlock = getPriceDecayStartBlock();
+        lastPurchaseBlock = block.number;
+    }
 
-        for (uint256 i = 0; i < proof.length; i++) {
-            bytes32 proofElement = proof[i];
+    /*
+     * MODIFIERS
+     */
 
-            if (computedHash <= proofElement) {
-                // Hash(current computed hash + current element of the proof)
-                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
-            } else {
-                // Hash(current element of the proof + current computed hash)
-                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
-            }
-        }
-
-        // Check if the computed hash (root) is equal to the provided root
-        return computedHash == root;
+    /**
+     * @dev canDistribute checks it's time to distribute
+     */
+    modifier canDistribute() {
+        require(startingIndex == 0, "already executed");
+        require(REVEALED, "not revealed");
+        _;
     }
 }

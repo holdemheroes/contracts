@@ -1,11 +1,10 @@
 const { expect } = require("chai")
 const {
   BN, // Big Number support
-  expectRevert,
   expectEvent,
 } = require("@openzeppelin/test-helpers")
 
-const { vorDevConfig, getRanksForUpload, getHandsForUpload, playTestData, handEvalUploadJson } = require("../helpers/test_data")
+const { vorDevConfig } = require("../helpers/test_data")
 
 const { increaseBlockTime, mineOneBlock } = require( "../helpers/chain" )
 const utils = require( "../helpers/utils" )

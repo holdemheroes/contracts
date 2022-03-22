@@ -29,7 +29,7 @@ module.exports = async function(callback) {
       const tx = await hh.methods.mintNFTPostReveal( i ).send({ value: nftPrice, from: minters[m] })
 
       if(tx.transactionHash) {
-        console.log( `tx sent to mint token ${i}`, tx.transactionHash, tx.gasUsed )
+        console.log( `tx sent to mint token ${i} for ${web3.utils.fromWei(nftPrice)} ETH`, tx.transactionHash, tx.gasUsed )
       } else {
         console.log(tx)
       }

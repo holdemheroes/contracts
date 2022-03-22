@@ -15,6 +15,12 @@ const MockVORDeterministic = artifacts.require("MockVORDeterministic")
 
 contract("TexasHoldemV1 - misc", async function(accounts) {
 
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   const testCasses = [
     [[35, 39, 43, 47, 51], 1, 0, "Royal Flush"],
     [[31, 35, 39, 43, 47], 2, 1, "Straight Flush"],
@@ -37,7 +43,19 @@ contract("TexasHoldemV1 - misc", async function(accounts) {
 
       this.playingCards = await PlayingCards.new()
 
-      this.holdemHeroes = await HoldemHeroes.new(this.vor.address, this.xfund.address, this.playingCards.address, saleStart, 1, 0, 1326)
+      this.holdemHeroes = await HoldemHeroes.new(
+        this.vor.address,
+        this.xfund.address,
+        this.playingCards.address,
+        saleStart,
+        1,
+        1326,
+        targetBlocksPerSale,
+        saleHalflife,
+        priceSpeed,
+        priceHalflife,
+        startingPrice
+      )
 
       const rankData = getRanksForUpload()
       console.log("upload HEH ranks")

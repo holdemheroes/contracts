@@ -12,11 +12,29 @@ contract("HoldemHeroes - getters should succeed", async function(accounts) {
 
   const distStartIndex = 24
 
+  const targetBlocksPerSale = 5
+  const saleHalflife = 700
+  const priceSpeed = 1
+  const priceHalflife = 100
+  const startingPrice = web3.utils.toWei("0.22", "ether")
+
   // deploy contract once before this set of tests
   before(async function () {
     const saleStart = Math.floor(Date.now() / 1000)
     this.playingCards = await PlayingCards.new()
-    this.holdemHeroes = await HoldemHeroes.new(devAddresses.vor, devAddresses.xfund, this.playingCards.address, saleStart, 1, 0, 5)
+    this.holdemHeroes = await HoldemHeroes.new(
+      devAddresses.vor,
+      devAddresses.xfund,
+      this.playingCards.address,
+      saleStart,
+      1,
+      5,
+      targetBlocksPerSale,
+      saleHalflife,
+      priceSpeed,
+      priceHalflife,
+      startingPrice
+    )
     const rankData = getRanksForUpload()
     await this.holdemHeroes.uploadHandRanks(rankData.rankHashes, rankData.ranks)
     const hands = getHandsForUpload()
@@ -25,36 +43,6 @@ contract("HoldemHeroes - getters should succeed", async function(accounts) {
       await this.holdemHeroes.reveal(hands[i], i, "")
     }
     await this.holdemHeroes.beginDistributionTestable( distStartIndex )
-  })
-
-  describe("card getters - should succeed", function() {
-    it( "can getCardAsString", async function () {
-      for(let i = 0; i < 52; i += 1) {
-        const provC = `${provenance.cards.numbers[provenance.cards.cards_as_idxs[i].n]}${provenance.cards.suits[provenance.cards.cards_as_idxs[i].s]}`
-        const chainC = await this.holdemHeroes.getCardAsString(i)
-        expect(chainC).to.be.equal(provC)
-      }
-    })
-
-    it( "can getCardAsSvg", async function () {
-      for(let i = 0; i < 52; i += 1) {
-        const svg = getCardSvg(i)
-        const c = await this.holdemHeroes.getCardAsSvg(i)
-        expect(c).to.be.equal(svg)
-      }
-    })
-
-    it( "can getCardAsComponents", async function () {
-      for(let i = 0; i < 52; i += 1) {
-        const res = await this.holdemHeroes.getCardAsComponents(i)
-        expect(res.number.toNumber()).to.be.equal(provenance.cards.cards_as_idxs[i].n)
-        expect(res.suit.toNumber()).to.be.equal(provenance.cards.cards_as_idxs[i].s)
-      }
-    })
-
-    it( "...", async function () {
-      expect( true ).to.equal( true )
-    } )
   })
 
   describe("hand getters - should succeed", function() {

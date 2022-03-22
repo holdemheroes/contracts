@@ -3,7 +3,7 @@ const PlayingCards = artifacts.require("PlayingCards")
 const utils = require('./utils')
 
 module.exports = function(deployer, network) {
-  const contractAddresses = utils.getContractAddresses()
+  const contractAddresses = utils.getContractAddresses(network)
   deployer.then(async () => {
 
     await deployer.deploy(
@@ -18,6 +18,6 @@ module.exports = function(deployer, network) {
       }
     }
 
-    utils.writeContractAddresses(contractAddresses)
+    utils.writeContractAddresses(contractAddresses, network)
   })
 }

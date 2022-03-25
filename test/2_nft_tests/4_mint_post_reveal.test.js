@@ -17,18 +17,18 @@ contract("HoldemHeroes - post reveal mint", async function(accounts) {
   const saleHalflife = 700
   const priceSpeed = 1
   const priceHalflife = 100
-  const startingPrice = web3.utils.toWei("0.22", "ether")
+  const startingPrice = web3.utils.toWei("0.00001", "ether")
 
   // deploy contract once before this set of tests
   before(async function () {
-    const saleStart = Math.floor(Date.now() / 1000)
+    const saleStartBlockNum = 0
     this.playingCards = await PlayingCards.new()
     this.holdemHeroes = await HoldemHeroes.new(
       devAddresses.vor,
       devAddresses.xfund,
       this.playingCards.address,
-      saleStart,
-      1,
+      saleStartBlockNum,
+      Math.floor(Date.now() / 1000) + 1,
       5,
       targetBlocksPerSale,
       saleHalflife,
@@ -46,13 +46,13 @@ contract("HoldemHeroes - post reveal mint", async function(accounts) {
 
   describe("post reveal minting", function() {
     it( "cannot mintNFTPostReveal if not revealed yet", async function () {
-      const saleStart = Math.floor( Date.now() / 1000 )
+      const saleStartBlockNum = 0
       const holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,
         devAddresses.xfund,
         this.playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         5,
         targetBlocksPerSale,
         saleHalflife,
@@ -97,14 +97,14 @@ contract("HoldemHeroes - post reveal mint", async function(accounts) {
       const pricePerNft = await this.holdemHeroes.getNftPrice()
       await expectRevert(
         this.holdemHeroes.mintNFTPostReveal( 1326, { from: accounts[1], value: pricePerNft } ),
-        "invalid tokenId",
+        "invalid id",
       )
     } )
 
     it( "must mintNFTPostReveal with a valid price", async function () {
       await expectRevert(
         this.holdemHeroes.mintNFTPostReveal( 1, { from: accounts[1], value: 100 } ),
-        "eth value incorrect",
+        "eth too low",
       )
     } )
 

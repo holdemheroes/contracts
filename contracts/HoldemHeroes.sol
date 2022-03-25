@@ -12,8 +12,8 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
 
     // max number of NFTs allowed per address
     uint256 public MAX_PER_ADDRESS_OR_TX;
-    // timestamp for when public sale opens
-    uint256 public SALE_START_TIMESTAMP;
+    // block number for when public sale opens
+    uint256 public SALE_START_BLOCK_NUM;
 
     /// ---------------------------
     /// ------- CRISP STATE -------
@@ -61,8 +61,8 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @param _vorCoordinator address - address of VORCoordinator contract
      * @param _xfund address - address of xFUND contract
      * @param _playingCards address - address of Playing Cards contract
-     * @param _saleStartTime uint256 - unix timestamp for when pre-reveal sale starts. Allows time for card/rank init
-     * @param _revealSeconds uint256 - num seconds after pre-reveal sale starts that cards will be revealed and distributed
+     * @param _saleStartBlockNum uint256 - block number for when pre-reveal sale starts. Allows time for card/rank init
+     * @param _revealTimestamp uint256 - unix timestamp for when cards will be revealed and distributed
      * @param _maxNfts address - max number of NFTs a single wallet address can mint
      * @param _targetBlocksPerSale int256, e.g. 100
      * @param _saleHalflife int256, e.g. 700
@@ -74,8 +74,8 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         address _vorCoordinator,
         address _xfund,
         address _playingCards,
-        uint256 _saleStartTime,
-        uint256 _revealSeconds,
+        uint256 _saleStartBlockNum,
+        uint256 _revealTimestamp,
         uint256 _maxNfts,
         int256 _targetBlocksPerSale,
         int256 _saleHalflife,
@@ -84,19 +84,15 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         int256 _startingPrice
     )
     VORConsumerBase(_vorCoordinator, _xfund)
-    HoldemHeroesBase(_saleStartTime, _revealSeconds, _playingCards)
+    HoldemHeroesBase(_revealTimestamp, _playingCards)
     {
-        if (_saleStartTime >= block.timestamp) {
-            SALE_START_TIMESTAMP = _saleStartTime;
-        } else {
-            SALE_START_TIMESTAMP = block.timestamp;
-        }
+        SALE_START_BLOCK_NUM = (_saleStartBlockNum > block.number) ? _saleStartBlockNum : block.number;
 
         MAX_PER_ADDRESS_OR_TX = _maxNfts;
 
         // CRISP
-        lastPurchaseBlock = block.number;
-        priceDecayStartBlock = block.number;
+        lastPurchaseBlock = SALE_START_BLOCK_NUM;
+        priceDecayStartBlock = SALE_START_BLOCK_NUM;
 
         // scale parameters
         // see https://github.com/FrankieIsLost/CRISP/blob/master/src/test/CRISP.t.sol
@@ -189,7 +185,6 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         }
     }
 
-
     /*
      * MINT & DISTRIBUTION FUNCTIONS
      */
@@ -205,18 +200,18 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      */
     function mintNFTPreReveal(uint256 _numberOfNfts) external payable {
         uint256 numberOfNfts = (_numberOfNfts > 0) ? _numberOfNfts : 1;
-        require(block.timestamp >= SALE_START_TIMESTAMP, "not started");
+        require(block.number >= SALE_START_BLOCK_NUM, "not started");
         require(totalSupply() < MAX_NFT_SUPPLY, "sold out");
-        require(block.timestamp < REVEAL_TIMESTAMP, "sale ended");
+        require(block.timestamp < REVEAL_TIMESTAMP, "ended");
         require(numberOfNfts <= MAX_PER_ADDRESS_OR_TX, "> max per tx");
-        require(balanceOf(msg.sender) + numberOfNfts <= MAX_PER_ADDRESS_OR_TX, "mint limit reached");
+        require(balanceOf(msg.sender) + numberOfNfts <= MAX_PER_ADDRESS_OR_TX, "> mint limit");
         require(totalSupply() + numberOfNfts <= MAX_NFT_SUPPLY, "exceeds supply");
 
         int256 pricePerNft = _getNftPrice();
         uint256 pricePerNftScaled = uint256(pricePerNft.toInt());
         uint256 totalCost = pricePerNftScaled * numberOfNfts;
 
-        require(msg.value >= totalCost, "eth value incorrect");
+        require(msg.value >= totalCost, "eth too low");
 
         for (uint256 i = 0; i < numberOfNfts; i++) {
             uint256 mintIndex = totalSupply();
@@ -239,12 +234,12 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
     function mintNFTPostReveal(uint256 tokenId) external payable {
         require(REVEALED, "not revealed");
         require(startingIndex > 0, "not distributed");
-        require(tokenId >= 0 && tokenId < MAX_NFT_SUPPLY, "invalid tokenId");
+        require(tokenId >= 0 && tokenId < MAX_NFT_SUPPLY, "invalid id");
 
         int256 price = _getNftPrice();
         uint256 priceScaled = uint256(price.toInt());
 
-        require(msg.value >= priceScaled, "eth value incorrect");
+        require(msg.value >= priceScaled, "eth too low");
 
         _safeMint(msg.sender, tokenId);
 
@@ -314,7 +309,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @param _randomness uint256 the random number generated by the VOR Oracle
      */
     function fulfillRandomness(bytes32 _requestId, uint256 _randomness) internal override {
-        require(startingIndex == 0, "already executed");
+        require(startingIndex == 0, "already done");
         checkAndSetStartIdx(_randomness);
         emit DistributionResult(_requestId, _randomness, startingIndex);
     }
@@ -339,7 +334,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @dev canDistribute checks it's time to distribute
      */
     modifier canDistribute() {
-        require(startingIndex == 0, "already executed");
+        require(startingIndex == 0, "already done");
         require(REVEALED, "not revealed");
         _;
     }

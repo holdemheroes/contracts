@@ -21,7 +21,7 @@ WORKDIR /root/sim
 # first, copy only essential files required for compiling contracts
 COPY ./contracts ./contracts/
 COPY ./migrations ./migrations/
-COPY ./package.json ./yarn.lock ./truffle-config.js ./
+COPY ./package.json ./yarn.lock ./docker/truffle-config.js ./
 
 # install node dependencies, compile contracts & build VOR Oracle
 RUN yarn install --frozen-lockfile && \

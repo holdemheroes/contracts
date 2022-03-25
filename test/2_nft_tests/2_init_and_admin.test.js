@@ -21,14 +21,14 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
   describe('should succeed', function() {
     // deploy contract once before this set of tests
     before(async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 0
       const playingCards = await PlayingCards.new()
       this.holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,
         devAddresses.xfund,
         playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         5,
         targetBlocksPerSale,
         saleHalflife,
@@ -47,14 +47,14 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
     })
 
     it("can withdraw eth", async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 0
       const playingCards = await PlayingCards.new()
       const holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,
         devAddresses.xfund,
         playingCards.address,
-        saleStart,
-        100,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 100,
         5,
         targetBlocksPerSale,
         saleHalflife,
@@ -124,7 +124,7 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
 
       await expectRevert(
         this.holdemHeroes.fallbackDistribution(),
-        "already executed",
+        "already done",
       )
     })
 
@@ -136,14 +136,14 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
   describe('should fail', function() {
     // deploy contract before each
     beforeEach(async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 1
       const playingCards = await PlayingCards.new()
       this.holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,
         devAddresses.xfund,
         playingCards.address,
-        saleStart,
-        100,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 100,
         5,
         targetBlocksPerSale,
         saleHalflife,
@@ -166,7 +166,7 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       await this.holdemHeroes.uploadHandRanks(rankData.rankHashes, rankData.ranks)
       await expectRevert(
         this.holdemHeroes.uploadHandRanks(rankData.rankHashes, rankData.ranks),
-        "ranks uploaded",
+        "uploaded",
       )
     })
 
@@ -174,7 +174,7 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       const hands = getHandsForUpload()
       await expectRevert(
         this.holdemHeroes.reveal(hands[0], 0, ""),
-        "not time to reveal yet",
+        "not yet",
       )
     })
 
@@ -199,7 +199,7 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       await increaseBlockTime(110)
       await expectRevert(
         this.holdemHeroes.reveal(hands[0], 1, ""),
-        "batch sequence incorrect",
+        "seq incorrect",
       )
     })
 
@@ -240,7 +240,7 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       // send batch 0 with batch Id 1
       await expectRevert(
         this.holdemHeroes.reveal(hands[0], 1, ""),
-        "batch already added",
+        "already added",
       )
     })
 
@@ -252,7 +252,7 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       }
       await expectRevert(
         this.holdemHeroes.reveal(hands[0], 0, ""),
-        "already revealed",
+        "revealed",
       )
     })
 

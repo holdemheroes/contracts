@@ -25,15 +25,15 @@ contract("TexasHoldemV1 - deploy", async function(accounts) {
     const pheSubFee = 1
 
     before(async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 0
       this.playingCards = await PlayingCards.new()
 
       this.holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,
         devAddresses.xfund,
         this.playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         5,
         targetBlocksPerSale,
         saleHalflife,

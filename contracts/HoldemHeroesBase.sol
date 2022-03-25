@@ -62,19 +62,13 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
      * @dev constructor
      * @dev initialises some basic variables.
      *
-     * @param _saleStartTime uint256 - unix timestamp for when pre-reveal sale starts. Used to calculate reveal timestamp
-     * @param _revealSeconds uint256 - num seconds after pre-reveal sale starts that cards will be revealed and distributed
+     * @param _revealTimestamp uint256 - unix timestamp for when cards will be revealed and distributed
      * @param _playingCards address - address of Playing Cards contract
      */
-    constructor(uint256 _saleStartTime, uint256 _revealSeconds, address _playingCards)
+    constructor(uint256 _revealTimestamp, address _playingCards)
     ERC721("Holdem Heroes", "HEH")
     Ownable() {
-        if (_saleStartTime >= block.timestamp) {
-            REVEAL_TIMESTAMP = _saleStartTime + _revealSeconds;
-        } else {
-            REVEAL_TIMESTAMP = block.timestamp + _revealSeconds;
-        }
-
+        REVEAL_TIMESTAMP = _revealTimestamp;
         REVEALED = false;
         RANKS_UPLOADED = false;
         handUploadId = 0;
@@ -96,7 +90,7 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
      * @param ranks uint8[] array of corresponding ranks for rankHashes
      */
     function uploadHandRanks(bytes32[] memory rankHashes, uint8[] memory ranks) external onlyOwner {
-        require(!RANKS_UPLOADED, "ranks uploaded");
+        require(!RANKS_UPLOADED, "uploaded");
         for (uint8 i = 0; i < rankHashes.length; i++) {
             handRanks[rankHashes[i]] = ranks[i];
         }
@@ -123,11 +117,11 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
      * @param ipfs string IPFS hash of provenance.json. Sent with final batch only
      */
     function reveal(uint8[2][] memory inputs, uint8 batchId, string memory ipfs) public onlyOwner {
-        require(block.timestamp >= REVEAL_TIMESTAMP, "not time to reveal yet");
-        require(handUploadId < 1325, "already revealed");
-        require(batchId == nextExpectedBatchId, "batch sequence incorrect");
+        require(block.timestamp >= REVEAL_TIMESTAMP, "not yet");
+        require(handUploadId < 1325, "revealed");
+        require(batchId == nextExpectedBatchId, "seq incorrect");
         bytes32 dataHash = keccak256(abi.encodePacked(inputs));
-        require(!isHandRevealed[dataHash], "batch already added");
+        require(!isHandRevealed[dataHash], "already added");
         isHandRevealed[dataHash] = true;
         for (uint8 i = 0; i < inputs.length; i++) {
             hands[handUploadId] = Hand(inputs[i][0],inputs[i][1]);
@@ -277,7 +271,7 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
      * @return uint16 hand ID associate to the token
      */
     function tokenIdToHandId(uint256 _tokenId) public view returns (uint16) {
-        require(_tokenId >= 0 && _tokenId < 1326, "invalid tokenId");
+        require(_tokenId >= 0 && _tokenId < 1326, "invalid id");
         require(startingIndex > 0, "not distributed");
         return uint16((_tokenId + startingIndex) % MAX_NFT_SUPPLY);
     }

@@ -23,15 +23,15 @@ contract("TexasHoldemV1 - admin", async function(accounts) {
   const startingPrice = web3.utils.toWei("0.22", "ether")
 
   before(async function () {
-    const saleStart = Math.floor(Date.now() / 1000)
+    const saleStartBlockNum = 0
     this.xFUND = await xFUND.new() // for testing increaseVorCoordinatorAllowance
     this.playingCards = await PlayingCards.new()
     this.holdemHeroes = await HoldemHeroes.new(
       devAddresses.vor,
       this.xFUND.address,
       this.playingCards.address,
-      saleStart,
-      1,
+      saleStartBlockNum,
+      Math.floor(Date.now() / 1000) + 1,
       5,
       targetBlocksPerSale,
       saleHalflife,

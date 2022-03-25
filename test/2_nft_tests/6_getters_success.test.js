@@ -58,7 +58,6 @@ contract("HoldemHeroes - getters should succeed", async function(accounts) {
 
     it( "getHandName returns correct name", async function () {
       let res = await this.holdemHeroes.getHandName(24)
-      console.log(res)
       expect(res).to.be.equal(provenance.hands[24].hand)
       res = await this.holdemHeroes.getHandName(856)
       expect(res).to.be.equal(provenance.hands[856].hand)

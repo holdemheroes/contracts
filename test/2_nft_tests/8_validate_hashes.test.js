@@ -38,21 +38,27 @@ contract("HoldemHeroes - hashes", async function(accounts) {
     await this.holdemHeroes.uploadHandRanks(rankData.rankHashes, rankData.ranks)
     const hands = getHandsForUpload()
     await increaseBlockTime(10)
+    console.log(`reveal ${hands.length} hand batches`)
     for( let i = 0; i < hands.length; i += 1) {
       await this.holdemHeroes.reveal(hands[i], i, "")
+      process.stdout.write(`.${i+1}`)
     }
+    console.log("")
     await this.holdemHeroes.beginDistributionTestable( distStartIndex )
   })
 
   describe("validate provenance hashes", function() {
-    it( "provenance hashes match", async function () {
-      let chainHashesConcat = ""
-      for(let i = 0; i < 1326; i += 1) {
+    let chainHashesConcat = ""
+    for(let i = 0; i < 1326; i += 1) {
+      it( `token ${i} on-chain hash matches provenance hash`, async function () {
         const provHash = provenance.hands[i].hash
         const chainHandHash = await this.holdemHeroes.getHandHash( i )
         expect(chainHandHash).to.be.equal(provHash)
         chainHashesConcat += stripHexPrefix(chainHandHash)
-      }
+      })
+    }
+
+    it( "on-chain root hash matches provenance", async function () {
       const chainProvenanceCalculated = web3.utils.soliditySha3(chainHashesConcat)
       const chainProvenance = await this.holdemHeroes.HAND_PROVENANCE_TESTABLE()
       const provProvenance = provenance.provenance

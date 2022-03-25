@@ -50,7 +50,7 @@ contract("HoldemHeroes - distribution", async function(accounts) {
     await this.holdemHeroes.uploadHandRanks(rankData.rankHashes, rankData.ranks)
     const hands = getHandsForUpload()
     await increaseBlockTime(10)
-    console.log(`upload ${hands.length} ranks`)
+    console.log(`reveal ${hands.length} hand batches`)
     for( let i = 0; i < hands.length; i += 1) {
       await this.holdemHeroes.reveal(hands[i], i, "")
       process.stdout.write(`.${i+1}`)

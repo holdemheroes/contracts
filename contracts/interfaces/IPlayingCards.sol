@@ -10,7 +10,7 @@ interface IPlayingCards {
     function getCardAsString(uint8 cardId) external view returns (string memory);
     function getCardAsSvg(uint8 cardId) external view returns (string memory);
     function getCardAsComponents(uint8 cardId) external view returns (uint8 number, uint8 suit);
-    function getCardBody(uint8 numberId, uint8 suitId, string memory fX, string memory sX, string memory rX) external pure returns (string memory);
+    function getCardBody(uint8 numberId, uint8 suitId, uint256 fX, uint256 sX, uint256 rX) external pure returns (string memory);
     function getSuitPath(uint8 suitId) external pure returns (string memory);
     function getNumberPath(uint8 numberId) external pure returns (string memory);
 }

@@ -3,7 +3,7 @@ pragma solidity >=0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./Base64.sol";
+import "./libs/Base64.sol";
 import "./interfaces/IPlayingCards.sol";
 
 
@@ -227,8 +227,8 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
 
         string[4] memory parts;
         parts[0] = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 148 62\" width=\"5in\" height=\"2.147in\">";
-        parts[1] = playingCards.getCardBody(playingCards.getCardNumberAsUint(card1), playingCards.getCardSuitAsUint(card1), "7", "32", "2");
-        parts[2] = playingCards.getCardBody(playingCards.getCardNumberAsUint(card2), playingCards.getCardSuitAsUint(card2), "82", "107", "76");
+        parts[1] = playingCards.getCardBody(playingCards.getCardNumberAsUint(card1), playingCards.getCardSuitAsUint(card1), 7, 32, 2);
+        parts[2] = playingCards.getCardBody(playingCards.getCardNumberAsUint(card2), playingCards.getCardSuitAsUint(card2), 82, 107, 76);
         parts[3] = "</svg>";
 
         string memory output = string(

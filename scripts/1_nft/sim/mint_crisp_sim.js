@@ -20,8 +20,8 @@ module.exports = async function(callback) {
                              // the simulation will mine blocks until the price falls below this EXAMPLE WAS 2.0
 
   // HEH reveal/mint (no real need to change these for the simulation)
-  const saleStart = Math.floor(Date.now() / 1000) // Starts as soon as contract is deployed. Or set as unix epoch
-  const revealTime = 84600                           // Pre-reveal/blind sale ends in 1 day
+  const saleStart = 1 // Starts as soon as contract is deployed.
+  const revealTime = Math.floor(Date.now() / 1000) + 84600 // Pre-reveal/blind sale ends in 1 day
   const maxMintable = 1326                           // Max a single user can mint. Recommend leaving for simulation
 
   // ----------

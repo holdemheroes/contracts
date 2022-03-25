@@ -18,8 +18,8 @@ module.exports = async function(callback) {
   try {
     const contractAddresses = utils.getContractAddresses()
 
-    const saleStart = Math.floor(Date.now() / 1000)
-    const revealTime = 5
+    const saleStartBlockNum = 0
+    const revealTime = Math.floor(Date.now() / 1000) + 5
     const maxMintable = 1326
 
     const targetBlocksPerSale = 1
@@ -38,7 +38,7 @@ module.exports = async function(callback) {
       netConfigs.networks[networkName].addresses.vor,
       netConfigs.networks[networkName].addresses.xfund,
       playingCards.address,
-      saleStart,
+      saleStartBlockNum,
       revealTime,
       maxMintable,
       targetBlocksPerSale,

@@ -25,7 +25,7 @@ contract("HoldemHeroes - distribution", async function(accounts) {
   const startingPrice = web3.utils.toWei("0.22", "ether")
 
   before(async function () {
-    const saleStart = Math.floor(Date.now() / 1000)
+    const saleStartBlockNum = 0
     this.xfund = await xFUND.new()
     this.vor = await MockVORDeterministic.new();
     this.playingCards = await PlayingCards.new()
@@ -33,8 +33,8 @@ contract("HoldemHeroes - distribution", async function(accounts) {
       this.vor.address,
       this.xfund.address,
       this.playingCards.address,
-      saleStart,
-      1,
+      saleStartBlockNum,
+      Math.floor(Date.now() / 1000) + 1,
       5,
       targetBlocksPerSale,
       saleHalflife,
@@ -86,14 +86,14 @@ contract("HoldemHeroes - distribution", async function(accounts) {
   it("cannot initiate distribution more than once", async function () {
     await expectRevert(
       this.holdemHeroes.beginDistribution(vorDevConfig.vor_key_hash, vorDevConfig.vor_fee),
-      "already executed",
+      "already done",
     )
   })
 
   it("cannot fulfill more than once", async function () {
     await expectRevert(
       this.vor.fulfillRequestUseSentContractAddress( this.requestId, flopRandomness, this.holdemHeroes.address),
-      "already executed",
+      "already done",
     )
   })
 

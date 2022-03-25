@@ -20,14 +20,14 @@ contract("HoldemHeroes - getters should succeed", async function(accounts) {
 
   // deploy contract once before this set of tests
   before(async function () {
-    const saleStart = Math.floor(Date.now() / 1000)
+    const saleStartBlockNum = 0
     this.playingCards = await PlayingCards.new()
     this.holdemHeroes = await HoldemHeroes.new(
       devAddresses.vor,
       devAddresses.xfund,
       this.playingCards.address,
-      saleStart,
-      1,
+      saleStartBlockNum,
+      Math.floor(Date.now() / 1000) + 1,
       5,
       targetBlocksPerSale,
       saleHalflife,

@@ -34,7 +34,7 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
 
   describe('should succeed', function() {
     before(async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 0
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
@@ -43,8 +43,8 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
         this.vor.address,
         this.xfund.address,
         this.playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         5,
         targetBlocksPerSale,
         saleHalflife,
@@ -231,7 +231,7 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
 
   describe('should fail', function() {
     before(async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 0
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
@@ -239,8 +239,8 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
         this.vor.address,
         this.xfund.address,
         this.playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         5,
         targetBlocksPerSale,
         saleHalflife,
@@ -317,7 +317,7 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
 
   describe('check stale status', function() {
     before( async function () {
-      const saleStart = Math.floor( Date.now() / 1000 )
+      const saleStartBlockNum = 0
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
@@ -325,8 +325,8 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
         this.vor.address,
         this.xfund.address,
         this.playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         5,
         targetBlocksPerSale,
         saleHalflife,

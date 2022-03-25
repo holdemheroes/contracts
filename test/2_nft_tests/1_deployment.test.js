@@ -20,14 +20,14 @@ contract("HoldemHeroes - deploy", async function(accounts) {
 
   describe('should succeed', function() {
     it("can deploy with correct params", async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 1
       const playingCards = await PlayingCards.new()
       const holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,
         devAddresses.xfund,
         playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         5,
         targetBlocksPerSale,
         saleHalflife,
@@ -54,21 +54,20 @@ contract("HoldemHeroes - deploy", async function(accounts) {
         priceHalflife,
         startingPrice
       )
-      const saleStart = await holdemHeroes.SALE_START_TIMESTAMP()
-      expect(saleStart).to.be.bignumber.gt(new BN(0))
+      const saleStartBlockNum = await holdemHeroes.SALE_START_BLOCK_NUM()
+      expect(saleStartBlockNum).to.be.bignumber.gt(new BN(0))
     })
 
     it("params correctly set", async function () {
-      const saleStart = Math.floor(Date.now() / 1000) + 100
-      const revealTime = 86400
-      const expectedRevealTime = saleStart + revealTime
+      const saleStartBlockNum = 1
+      const revealTime = Math.floor(Date.now() / 1000) + 86400
       const maxNfts = 5
       const playingCards = await PlayingCards.new()
       const holdemHeroes = await HoldemHeroes.new(
         devAddresses.vor,
         devAddresses.xfund,
         playingCards.address,
-        saleStart,
+        saleStartBlockNum,
         revealTime,
         maxNfts,
         targetBlocksPerSale,
@@ -83,7 +82,7 @@ contract("HoldemHeroes - deploy", async function(accounts) {
       const ranksUploaded = await holdemHeroes.RANKS_UPLOADED()
       const handUploadId = await holdemHeroes.handUploadId()
 
-      expect(reveal).to.be.bignumber.equal(new BN(expectedRevealTime))
+      expect(reveal).to.be.bignumber.equal(new BN(revealTime))
       expect(mNfts).to.be.bignumber.equal(new BN(maxNfts))
       expect(revealed).to.be.equal(false)
       expect(ranksUploaded).to.be.equal(false)

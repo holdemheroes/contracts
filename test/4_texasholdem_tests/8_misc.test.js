@@ -37,7 +37,7 @@ contract("TexasHoldemV1 - misc", async function(accounts) {
   // @skip-on-coverage
   describe('should succeed', function() {
     before(async function () {
-      const saleStart = Math.floor(Date.now() / 1000)
+      const saleStartBlockNum = 0
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
 
@@ -47,8 +47,8 @@ contract("TexasHoldemV1 - misc", async function(accounts) {
         this.vor.address,
         this.xfund.address,
         this.playingCards.address,
-        saleStart,
-        1,
+        saleStartBlockNum,
+        Math.floor(Date.now() / 1000) + 1,
         1326,
         targetBlocksPerSale,
         saleHalflife,

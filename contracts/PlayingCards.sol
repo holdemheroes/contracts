@@ -124,7 +124,7 @@ contract PlayingCards {
         // based on https://commons.wikimedia.org/wiki/Category:SVG_playing_cards
         string[3] memory parts;
         parts[0] = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 72 62\" width=\"2.5in\" height=\"2.147in\">";
-        parts[1] = getCardBody(cards[cardId].number, cards[cardId].suit, "7", "32", "1");
+        parts[1] = getCardBody(cards[cardId].number, cards[cardId].suit, 7, 32, 1);
         parts[2] = "</svg>";
         string memory output = string(abi.encodePacked(parts[0], parts[1], parts[2]));
         return output;
@@ -135,12 +135,12 @@ contract PlayingCards {
      *
      * @param numberId uint8 number id as per the numbers array
      * @param suitId uint8 suit id as per the suits array
-     * @param fX string x coordinate for the number/figure
-     * @param sX string x coordinate for the suit
-     * @param rX string x coordinate for the surrounding rectangle
+     * @param fX uint256 x coordinate for the number/figure
+     * @param sX uint256 x coordinate for the suit
+     * @param rX uint256 x coordinate for the surrounding rectangle
      * @return string SVG elements
      */
-    function getCardBody(uint8 numberId, uint8 suitId, string memory fX, string memory sX, string memory rX)
+    function getCardBody(uint8 numberId, uint8 suitId, uint256 fX, uint256 sX, uint256 rX)
     validSuitId(suitId) validNumberId(numberId)
     public pure returns (string memory) {
         string memory colour = "red";
@@ -160,19 +160,19 @@ contract PlayingCards {
         parts[8] = getNumberPath(numberId);
         parts[9] = "</symbol>";
         parts[10] = "<rect width=\"70\" height=\"60\" x=\"";
-        parts[11] = rX;
+        parts[11] = toString(rX);
         parts[12] = "\" y=\"1\" rx=\"6\" ry=\"6\" fill=\"white\" stroke=\"black\"/>";
         parts[13] = "<use xlink:href=\"#F";
         parts[14] = toString(numberId);
         parts[15] = "\" height=\"32\" width=\"32\" x=\"";
-        parts[16] = fX;
+        parts[16] = toString(fX);
         parts[17] = "\" y=\"16\" stroke=\"";
         parts[18] = colour;
         parts[19] = "\"/>";
         parts[20] = "<use xlink:href=\"#S";
         parts[21] = toString(suitId);
         parts[22] = "\" height=\"32\" width=\"32\" x=\"";
-        parts[23] = sX;
+        parts[23] = toString(sX);
         parts[24] = "\" y=\"16\"/>";
 
         string memory output = string(

@@ -53,7 +53,9 @@ async function getPrices() {
   const baseDataPath = path.resolve( __dirname, `../../data/tmp/${flags.network}_${contractAddr}` )
   await fs.promises.mkdir( baseDataPath, { recursive: true } )
   const dataDumpPath = path.resolve(baseDataPath, "price_per_sale.csv")
-  let data = "block,num_bought,price,tx_hash\n"
+  let data = "block,num_bought,price_per_nft,total_price,tx_hash\n"
+
+  let totalSales = new BN(0)
 
   contractHttp.getPastEvents("Transfer", {
     filter: {from: '0x0000000000000000000000000000000000000000'},
@@ -80,18 +82,19 @@ async function getPrices() {
         const tx = await web3Http.eth.getTransaction(txHash)
 
         const value = new BN(tx.value)
+        totalSales = totalSales.add(value)
         const blockNumber = tx.blockNumber
 
         const pricePerNFT = value.div(numBought)
 
-        const line = `${blockNumber},${numBought.toString()},${Web3.utils.fromWei(pricePerNFT.toString())},${txHash}`
+        const line = `${blockNumber},${numBought.toString()},${Web3.utils.fromWei(pricePerNFT.toString())},${Web3.utils.fromWei(value.toString())},${txHash}`
         data += `${line}\n`
         console.log(line)
       }
 
       fs.writeFileSync(dataDumpPath, data)
+      console.log("total sales", Web3.utils.fromWei(totalSales.toString()))
     });
-
 }
 
 getPrices()

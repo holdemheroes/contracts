@@ -45,8 +45,6 @@ switch(flags.network) {
 const url = `wss://${alchemyPrefix}/${ALCHEMY_KEY}`
 
 async function getPrices() {
-
-
   const contractAddr = contractAddresses[flags.network].holdem_heroes_nft
   const web3Ws = await new Web3(url)
   const contract = await new web3Ws.eth.Contract(HEHAbi, contractAddr)
@@ -54,7 +52,9 @@ async function getPrices() {
   const baseDataPath = path.resolve( __dirname, `../../data/tmp/${flags.network}_${contractAddr}` )
   await fs.promises.mkdir( baseDataPath, { recursive: true } )
   const dataDumpPath = path.resolve(baseDataPath, "price_per_block.csv")
-  fs.writeFileSync(dataDumpPath, "block,price")
+  if(!fs.existsSync(dataDumpPath)) {
+    fs.writeFileSync( dataDumpPath, "block,price,ems\n" )
+  }
 
   let lastBlock = 0
 
@@ -65,17 +65,18 @@ async function getPrices() {
     })
     .on("data", async function newBlockHeadersRecieved(blockHeader) {
 
-      const thisBlock = blockHeader.number
+      const thisBlock = parseInt(blockHeader.number, 10)
       if(thisBlock > lastBlock) {
+        lastBlock = thisBlock
         const nftPrice = await contract.methods.getNftPrice().call()
+        const currentEms = await contract.methods.getCurrentEMS().call()
         const price = Web3.utils.fromWei(nftPrice)
 
-        let data = fs.readFileSync(dataDumpPath).toString()
-        data = `${data}\n${blockHeader.number},${price}`
+        const data = `${thisBlock},${price},${currentEms}`
 
-        fs.writeFileSync(dataDumpPath, data)
+        fs.appendFileSync(dataDumpPath, data+"\n")
 
-        console.log(`${blockHeader.number},${price}`)
+        console.log(`${data}`)
       }
     })
     .on("error", function newBlockHeadersError(error) {

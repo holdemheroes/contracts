@@ -22,7 +22,7 @@ contract HoldemHeroesL2 is Ownable, HoldemHeroesBase  {
      */
     constructor(uint256 _startingIndex, address _parentChainContractAddress, uint256 _parentNetworkId, address _playingCards)
     // There is no sale/pre-reveal sale on L2. Just using airdrop
-    HoldemHeroesBase(block.timestamp, 0, _playingCards)
+    HoldemHeroesBase(0, _playingCards)
     {
         REVEAL_TIMESTAMP = block.timestamp; // no reveal time
         startingIndex = _startingIndex; // already distributed on parent chain.

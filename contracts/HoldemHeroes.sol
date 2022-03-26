@@ -219,7 +219,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         }
 
         //update CRISP state
-        updateCrispState(pricePerNft);
+        updateCrispState(pricePerNft, numberOfNfts);
 
     }
 
@@ -244,7 +244,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         _safeMint(msg.sender, tokenId);
 
         //update CRISP state
-        updateCrispState(price);
+        updateCrispState(price, 1);
 
     }
 
@@ -318,9 +318,10 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @dev updateCrispState updates the CRISP parameters for dynamic pricing
      *
      * @param price int256 current price per NFT paid by user
+     * @param numMinted uint256 number minted in this Tx
      */
-    function updateCrispState(int256 price) internal {
-        nextPurchaseStartingEMS = getCurrentEMS() + PRBMathSD59x18.fromInt(1);
+    function updateCrispState(int256 price, uint256 numMinted) internal {
+        nextPurchaseStartingEMS = getCurrentEMS() + PRBMathSD59x18.fromInt(int256(numMinted));
         nextPurchaseStartingPrice = getNextStartingPrice(price);
         priceDecayStartBlock = getPriceDecayStartBlock();
         lastPurchaseBlock = block.number;

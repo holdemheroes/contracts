@@ -18,6 +18,7 @@ contract("TexasHoldemV1 - misc", async function(accounts) {
   const targetBlocksPerSale = 5
   const saleHalflife = 700
   const priceSpeed = 1
+  const priceSpeedDenominator = 1
   const priceHalflife = 100
   const startingPrice = web3.utils.toWei("0.22", "ether")
 
@@ -53,6 +54,7 @@ contract("TexasHoldemV1 - misc", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )

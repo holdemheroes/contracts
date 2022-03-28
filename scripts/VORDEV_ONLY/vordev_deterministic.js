@@ -25,6 +25,7 @@ module.exports = async function(callback) {
     const targetBlocksPerSale = 1
     const saleHalflife = 700
     const priceSpeed = 1
+    const priceSpeedDenominator = 2
     const priceHalflife = 100
     const startingPrice = web3.utils.toWei("0.0000000001", "ether")
 
@@ -44,6 +45,7 @@ module.exports = async function(callback) {
       targetBlocksPerSale,
       saleHalflife,
       priceSpeed,
+      priceSpeedDenominator,
       priceHalflife,
       startingPrice
     )

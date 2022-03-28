@@ -16,6 +16,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
   const targetBlocksPerSale = 5
   const saleHalflife = 700
   const priceSpeed = 1
+  const priceSpeedDenominator = 1
   const priceHalflife = 100
   const startingPrice = web3.utils.toWei("0.000000000000000001", "ether")
 
@@ -34,6 +35,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -107,6 +109,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
     //     targetBlocksPerSale,
     //     saleHalflife,
     //     priceSpeed,
+    //     priceSpeedDenominator,
     //     priceHalflife,
     //     startingPrice
     //   )
@@ -179,6 +182,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -201,6 +205,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -225,6 +230,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -248,6 +254,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -276,6 +283,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         1000
       )
@@ -301,6 +309,7 @@ contract("HoldemHeroes - pre reveal sale", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )

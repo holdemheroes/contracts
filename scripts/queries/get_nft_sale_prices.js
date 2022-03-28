@@ -56,6 +56,7 @@ async function getPrices() {
   let data = "block,num_bought,price_per_nft,total_price,tx_hash\n"
 
   let totalSales = new BN(0)
+  let totalNumSold = new BN(0)
 
   contractHttp.getPastEvents("Transfer", {
     filter: {from: '0x0000000000000000000000000000000000000000'},
@@ -79,6 +80,7 @@ async function getPrices() {
       for(let i = 0; i < hxHashes.length; i += 1) {
         const txHash = hxHashes[i]
         const numBought = new BN(txs[txHash])
+        totalNumSold = totalNumSold.add(numBought)
         const tx = await web3Http.eth.getTransaction(txHash)
 
         const value = new BN(tx.value)
@@ -93,7 +95,10 @@ async function getPrices() {
       }
 
       fs.writeFileSync(dataDumpPath, data)
+      const meanSale = totalSales.div(totalNumSold)
+      console.log("num sold", totalNumSold.toString())
       console.log("total sales", Web3.utils.fromWei(totalSales.toString()))
+      console.log("mean price", Web3.utils.fromWei(meanSale.toString()))
     });
 }
 

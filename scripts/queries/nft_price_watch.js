@@ -57,6 +57,7 @@ async function getPrices() {
   }
 
   let lastBlock = 0
+  const startBlock = await contract.methods.SALE_START_BLOCK_NUM().call()
 
   web3Ws.eth
     .subscribe("newBlockHeaders")
@@ -68,15 +69,22 @@ async function getPrices() {
       const thisBlock = parseInt(blockHeader.number, 10)
       if(thisBlock > lastBlock) {
         lastBlock = thisBlock
-        const nftPrice = await contract.methods.getNftPrice().call()
-        const currentEms = await contract.methods.getCurrentEMS().call()
-        const price = Web3.utils.fromWei(nftPrice)
+        try {
+          const nftPrice = await contract.methods.getNftPrice().call()
+          let currentEms = 0
+          if(thisBlock >= startBlock) {
+            currentEms = await contract.methods.getCurrentEMS().call()
+          }
+          const price = Web3.utils.fromWei( nftPrice )
 
-        const data = `${thisBlock},${price},${currentEms}`
+          const data = `${thisBlock},${price},${currentEms}`
 
-        fs.appendFileSync(dataDumpPath, data+"\n")
+          fs.appendFileSync( dataDumpPath, data + "\n" )
 
-        console.log(`${data}`)
+          console.log( `${data}` )
+        } catch(e) {
+          console.log(e)
+        }
       }
     })
     .on("error", function newBlockHeadersError(error) {

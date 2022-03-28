@@ -57,6 +57,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
     /**
      * @dev constructor
      * @dev initialises some basic variables.
+     * @dev CRISP implementation from https://github.com/FrankieIsLost/CRISP/blob/master/src/CRISP.sol
      *
      * @param _vorCoordinator address - address of VORCoordinator contract
      * @param _xfund address - address of xFUND contract
@@ -67,6 +68,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @param _targetBlocksPerSale int256, e.g. 100
      * @param _saleHalflife int256, e.g. 700
      * @param _priceSpeed int256, e.g. 1
+     * @param _priceSpeedDenominator int256, e.g. 4. If _priceSpeed param is 1, final priceSpeed will be 0.25
      * @param _priceHalflife int256, e.g. 100
      * @param _startingPrice int256, e.g. 100
      */
@@ -80,6 +82,7 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         int256 _targetBlocksPerSale,
         int256 _saleHalflife,
         int256 _priceSpeed,
+        int256 _priceSpeedDenominator,
         int256 _priceHalflife,
         int256 _startingPrice
     )
@@ -94,17 +97,14 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         lastPurchaseBlock = SALE_START_BLOCK_NUM;
         priceDecayStartBlock = SALE_START_BLOCK_NUM;
 
-        // scale parameters
-        // see https://github.com/FrankieIsLost/CRISP/blob/master/src/test/CRISP.t.sol
+        // scale parameters - see https://github.com/FrankieIsLost/CRISP/blob/master/src/test/CRISP.t.sol
         int256 targetBlocksPerSale = PRBMathSD59x18.fromInt(
             _targetBlocksPerSale
         );
 
         saleHalflife = PRBMathSD59x18.fromInt(_saleHalflife);
-        priceSpeed = PRBMathSD59x18.fromInt(_priceSpeed);
+        priceSpeed = PRBMathSD59x18.fromInt(_priceSpeed).div(PRBMathSD59x18.fromInt(_priceSpeedDenominator));
         priceHalflife = PRBMathSD59x18.fromInt(_priceHalflife);
-
-        int256 startingPrice = PRBMathSD59x18.fromInt(int256(_startingPrice));
 
         //calculate target EMS from target blocks per sale
         targetEMS = PRBMathSD59x18.fromInt(1).div(
@@ -116,14 +116,19 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
 
         nextPurchaseStartingEMS = targetEMS;
 
-        nextPurchaseStartingPrice = startingPrice;
+        nextPurchaseStartingPrice = PRBMathSD59x18.fromInt(int256(_startingPrice));
     }
 
     /*
      * CRISP FUNCTIONS
      */
 
-    ///@notice get current EMS based on block number. Returns 59.18-decimal fixed-point
+    /**
+     * @dev getCurrentEMS gets current EMS based on block number.
+     * @dev implemented from https://github.com/FrankieIsLost/CRISP/blob/master/src/CRISP.sol
+     *
+     * @return result int256 59.18-decimal fixed-point
+     */
     function getCurrentEMS() public view returns (int256 result) {
         int256 blockInterval = int256(block.number - lastPurchaseBlock);
         blockInterval = blockInterval.fromInt();
@@ -133,7 +138,12 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         result = nextPurchaseStartingEMS.mul(weightOnPrev);
     }
 
-    ///@notice get quote for purchasing in current block, decaying price as needed. Returns 59.18-decimal fixed-point
+    /**
+     * @dev _getNftPrice get quote for purchasing in current block, decaying price as needed.
+     * @dev implemented from https://github.com/FrankieIsLost/CRISP/blob/master/src/CRISP.sol
+     *
+     * @return result int256 59.18-decimal fixed-point
+     */
     function _getNftPrice() internal view returns (int256 result) {
         if (block.number <= priceDecayStartBlock) {
             result = nextPurchaseStartingPrice;
@@ -147,13 +157,24 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         }
     }
 
-    ///@notice get quote for purchasing in current block, decaying price as needed. Returns uint256
+    /**
+     * @dev getNftPrice get quote for purchasing in current block, decaying price as needed
+     * @dev implemented from https://github.com/FrankieIsLost/CRISP/blob/master/src/CRISP.sol
+     *
+     * @return result uint256 current price in wei
+     */
     function getNftPrice() public view returns (uint256 result) {
         int256 pricePerNft = _getNftPrice();
         result = uint256(pricePerNft.toInt());
     }
 
-    ///@notice Get starting price for next purchase before time decay. Returns 59.18-decimal fixed-point
+    /**
+     * @dev getNextStartingPriceGet starting price for next purchase before time decay
+     * @dev implemented from https://github.com/FrankieIsLost/CRISP/blob/master/src/CRISP.sol
+     *
+     * @param lastPurchasePrice int256 last price as 59.18-decimal fixed-point
+     * @return result int256 59.18-decimal fixed-point
+     */
     function getNextStartingPrice(int256 lastPurchasePrice)
     public
     view
@@ -169,7 +190,12 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
         }
     }
 
-    ///@notice Find block in which time based price decay should start
+    /**
+     * @dev getPriceDecayStartBlock Find block in which time based price decay should start
+     * @dev implemented from https://github.com/FrankieIsLost/CRISP/blob/master/src/CRISP.sol
+     *
+     * @return result uint256 block number
+     */
     function getPriceDecayStartBlock() internal view returns (uint256 result) {
         int256 mismatchRatio = nextPurchaseStartingEMS.div(targetEMS);
         //if mismatch ratio above 1, decay should start in future

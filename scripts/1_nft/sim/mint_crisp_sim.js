@@ -11,6 +11,7 @@ module.exports = async function(callback) {
   const targetBlocksPerSale = 9 // Ideal time between mints
   const saleHalflife = 81     // CRISP example sets to 700
   const priceSpeed = 1           // CRISP example sets to 1
+  const priceSpeedDenominator = 2 // amount to divide priceSpeed by
   const priceHalflife = 81    // CRISP example sets to 100
   const startingPrice = 0.01    // Start price in ETH. Will be converted to wei in the script
 
@@ -47,13 +48,14 @@ module.exports = async function(callback) {
 
   console.log("Simulation Parameters")
   console.log("---------------------")
-  console.log(`targetBlocksPerSale: ${targetBlocksPerSale}`)
-  console.log(`saleHalflife:        ${saleHalflife}`)
-  console.log(`priceSpeed:          ${priceSpeed}`)
-  console.log(`priceHalflife:       ${priceHalflife}`)
-  console.log(`startingPrice:       ${startingPrice}`)
-  console.log(`priceThreshold:      ${priceThreshold}`)
-  console.log(`blocksToMine:        ${blocksToMine}`)
+  console.log(`targetBlocksPerSale:   ${targetBlocksPerSale}`)
+  console.log(`saleHalflife:          ${saleHalflife}`)
+  console.log(`priceSpeed:            ${priceSpeed}`)
+  console.log(`priceSpeedDenominator: ${priceSpeedDenominator}`)
+  console.log(`priceHalflife:         ${priceHalflife}`)
+  console.log(`startingPrice:         ${startingPrice}`)
+  console.log(`priceThreshold:        ${priceThreshold}`)
+  console.log(`blocksToMine:          ${blocksToMine}`)
   console.log("")
   console.log("Start simulation")
   console.log("")
@@ -72,6 +74,7 @@ module.exports = async function(callback) {
       targetBlocksPerSale,
       saleHalflife,
       priceSpeed,
+      priceSpeedDenominator,
       priceHalflife,
       startPriceWei
     )
@@ -84,6 +87,9 @@ module.exports = async function(callback) {
     const initialPrice = await holdemHeroes.getNftPrice()
 
     console.log("initialPrice", web3.utils.fromWei(initialPrice))
+
+    const priceSpeedFromContract = await holdemHeroes.priceSpeed()
+    console.log("calculated priceSpeed", web3.utils.fromWei(priceSpeedFromContract))
 
     console.log("begin minting sim")
 

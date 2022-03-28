@@ -18,6 +18,7 @@ contract HoldemHeroesTestableDistribution is HoldemHeroes {
         int256 _targetBlocksPerSale,
         int256 _saleHalflife,
         int256 _priceSpeed,
+        int256 _priceSpeedDenominator,
         int256 _priceHalflife,
         int256 _startingPrice)
     HoldemHeroes(
@@ -30,6 +31,7 @@ contract HoldemHeroesTestableDistribution is HoldemHeroes {
         _targetBlocksPerSale,
         _saleHalflife,
         _priceSpeed,
+        _priceSpeedDenominator,
         _priceHalflife,
         _startingPrice
     ){}

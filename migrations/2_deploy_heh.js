@@ -8,15 +8,16 @@ module.exports = function(deployer, network) {
   deployer.then(async () => {
 
     // TODO - SET THESE VALUES FOR TARGET NETWORK
-    const saleStartBlockNum = 10376490 // block 0
-    const revealTimestamp = Math.floor(Date.now() / 1000) + 345600 // in 96 hours
+    const saleStartBlockNum = 10404740 // block 0
+    const revealTimestamp = Math.floor(Date.now() / 1000) + 172800 // in 48 hours
     const maxNftsPerTxOrAddress = 1326 // 1326 for Rinkeby/Vordev ONLY. For MN, use 6
 
     // CRISP
-    const targetBlocksPerSale = 20
-    const saleHalflife = 400
-    const priceSpeed = 1
-    const priceHalflife = 400
+    const targetBlocksPerSale = 9
+    const saleHalflife = 81
+    const priceSpeed = 1 // must be an integer > 0. For fractions, set priceSpeedDenominator to a value > 1
+    const priceSpeedDenominator = 4 // divide priceSpeed by this. E.g. priceSpeed=1, denominator=4, final speed = 0.25
+    const priceHalflife = 81
     const startingPrice = web3.utils.toWei("0.1", "ether")
 
     await deployer.deploy(
@@ -30,6 +31,7 @@ module.exports = function(deployer, network) {
       targetBlocksPerSale,
       saleHalflife,
       priceSpeed,
+      priceSpeedDenominator,
       priceHalflife,
       startingPrice
     )

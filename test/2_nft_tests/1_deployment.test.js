@@ -15,8 +15,36 @@ contract("HoldemHeroes - deploy", async function(accounts) {
   const targetBlocksPerSale = 5
   const saleHalflife = 700
   const priceSpeed = 1
+  const priceSpeedDenominator = 1
   const priceHalflife = 100
   const startingPrice = web3.utils.toWei("0.22", "ether")
+
+  const testPriceSpeeds = [
+    {
+      speed: 1,
+      denominator: 1,
+      expected: new BN("1000000000000000000"),
+      readable: "1",
+    },
+    {
+      speed: 1,
+      denominator: 2,
+      expected: new BN("500000000000000000"),
+      readable: "0.5",
+    },
+    {
+      speed: 1,
+      denominator: 3,
+      expected: new BN("333333333333333333"),
+      readable: "0.333333333333333333",
+    },
+    {
+      speed: 1,
+      denominator: 4,
+      expected: new BN("250000000000000000"),
+      readable: "0.25",
+    },
+  ]
 
   describe('should succeed', function() {
     it("can deploy with correct params", async function () {
@@ -32,6 +60,7 @@ contract("HoldemHeroes - deploy", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -51,6 +80,7 @@ contract("HoldemHeroes - deploy", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -73,6 +103,7 @@ contract("HoldemHeroes - deploy", async function(accounts) {
         targetBlocksPerSale,
         saleHalflife,
         priceSpeed,
+        priceSpeedDenominator,
         priceHalflife,
         startingPrice
       )
@@ -87,6 +118,35 @@ contract("HoldemHeroes - deploy", async function(accounts) {
       expect(revealed).to.be.equal(false)
       expect(ranksUploaded).to.be.equal(false)
       expect(handUploadId).to.be.bignumber.equal(new BN(0))
+    })
+
+    it("correctly calculates price speed", async function () {
+      const saleStartBlockNum = 1
+      const revealTime = Math.floor(Date.now() / 1000) + 86400
+      const maxNfts = 5
+      const playingCards = await PlayingCards.new()
+
+      for(let i = 0; i < testPriceSpeeds.length; i += 1) {
+        const t = testPriceSpeeds[i]
+        const holdemHeroes = await HoldemHeroes.new(
+          devAddresses.vor,
+          devAddresses.xfund,
+          playingCards.address,
+          saleStartBlockNum,
+          revealTime,
+          maxNfts,
+          targetBlocksPerSale,
+          saleHalflife,
+          t.speed,
+          t.denominator,
+          priceHalflife,
+          startingPrice
+        )
+
+        const contractPriceSpeed = await holdemHeroes.priceSpeed()
+        expect(contractPriceSpeed).to.be.bignumber.equal(t.expected)
+        expect(web3.utils.fromWei(contractPriceSpeed)).to.be.equal(t.readable)
+      }
     })
 
     it("...", async function () {

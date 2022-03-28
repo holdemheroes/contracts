@@ -1,3 +1,5 @@
+abigenBindings
+data
 node_modules
 .git
 .idea
@@ -5,3 +7,4 @@ build
 coverage
 docs
 logs
+test

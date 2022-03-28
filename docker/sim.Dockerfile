@@ -13,19 +13,19 @@ RUN \
   curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash && \
   . $NVM_DIR/nvm.sh && \
   nvm install $NODE_VERSION && \
-  npm install --global yarn && \
-  mkdir -p /root/sim
+  npm install --global yarn
 
+RUN mkdir -p /root/sim/data
 WORKDIR /root/sim
-
 # first, copy only essential files required for compiling contracts
-COPY ./contracts ./contracts/
-COPY ./migrations ./migrations/
 COPY ./package.json ./yarn.lock ./docker/truffle-config.js ./
 
 # install node dependencies, compile contracts & build VOR Oracle
-RUN yarn install --frozen-lockfile && \
-    npx truffle compile
+RUN yarn install --frozen-lockfile
+
+COPY ./contracts ./contracts/
+COPY ./migrations ./migrations/
+RUN npx truffle compile
 
 # Copy simulation script
 COPY ./scripts/1_nft/sim/mint_crisp_sim.js ./

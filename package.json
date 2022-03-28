@@ -1,11 +1,18 @@
 {
-  "name": "texas-holdem",
+  "name": "holdemheroes",
   "version": "0.0.1",
-  "description": "Texas Holdem NFT",
+  "description": "Holdem Heroes NFT & Texas Holdem Game contracts",
   "main": "index.js",
-  "repository": "https://github.com/.../texas-holdem",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holdemheroes/contracts.git"
+  },
   "author": "",
-  "license": "Apache-2",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/holdemheroes/contracts/issues"
+  },
+  "homepage": "https://github.com/holdemheroes/contracts#readme",
   "scripts": {
     "build": "truffle compile",
     "test": "truffle test",

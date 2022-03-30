@@ -18,7 +18,7 @@ module.exports = async function(callback) {
     console.log("transfer tx sent", tx.transactionHash)
     tx = await holdemHeroes.beginDistribution( netConfigs.networks[network].vor_key_hash,  netConfigs.networks[network].vor_fee, {from: admin})
     if(tx.tx) {
-      console.log( "beginDistribution tx sent", tx.tx )
+      console.log( "beginDistribution tx sent", tx.tx, tx.receipt.gasUsed )
     } else {
       console.log( tx )
     }

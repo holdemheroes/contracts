@@ -6,6 +6,8 @@ const artifactsToGenerate = [
   'HoldemHeroesL2',
   'IHoldemHeroes',
   'TexasHoldemV1',
+  'PlayingCards',
+  'IPlayingCards',
   'PokerHandEvaluator',
   'IPokerHandEvaluator'
 ]

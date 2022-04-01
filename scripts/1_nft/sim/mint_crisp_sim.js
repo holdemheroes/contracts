@@ -1,5 +1,13 @@
 require("dotenv").config()
+const path = require( "path" )
+const fs = require( "fs" )
+
 const HoldemHeroes = artifacts.require("HoldemHeroes")
+
+const {
+  BN, // Big Number support
+} = require("@openzeppelin/test-helpers")
+const Web3 = require( "web3" )
 
 module.exports = async function(callback) {
 
@@ -8,22 +16,37 @@ module.exports = async function(callback) {
   // ----------------------------------
 
   // CRISP specific
-  const targetBlocksPerSale = 9 // Ideal time between mints
-  const saleHalflife = 81     // CRISP example sets to 700
+  const targetBlocksPerSale = 14 // Ideal time between mints
+  const saleHalflife = 196     // CRISP example sets to 700
   const priceSpeed = 1           // CRISP example sets to 1
-  const priceSpeedDenominator = 2 // amount to divide priceSpeed by
-  const priceHalflife = 81    // CRISP example sets to 100
-  const startingPrice = 0.01    // Start price in ETH. Will be converted to wei in the script
+  const priceSpeedDenominator = 4 // amount to divide priceSpeed by
+  const priceHalflife = 98    // CRISP example sets to 100
+  const startingPrice = 0.1    // Start price in ETH. Will be converted to wei in the script
 
   // Simulation variables
-  const blocksToMine = 10    // number of additional blocks to mine between mint transactions EXAMPLE WAS 0
-  const priceThreshold = 0.2 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
-                             // the simulation will mine blocks until the price falls below this EXAMPLE WAS 2.0
+  const numberToSell = 1326
+  const blocksToMine = 30    // number of additional blocks to mine between mint transactions
+  const priceThreshold = 0.8 // simulates the highest price a user is willing pay in ETH. If the price rises above this,
+                             // the simulation will mine blocks until the price falls below a random value between waitForDropHigh and waitForDropLow
+  const waitForDropHigh = 0.2    // a random number between waitForDropHigh and waitForDropLow will be
+  const waitForDropLow = 0.05    // calculated once the priceThreshold is reached
 
   // HEH reveal/mint (no real need to change these for the simulation)
   const saleStart = 1 // Starts as soon as contract is deployed.
-  const revealTime = Math.floor(Date.now() / 1000) + 84600 // Pre-reveal/blind sale ends in 1 day
+  const revealTime = Math.floor(Date.now() / 1000) + 259200 // Pre-reveal/blind sale ends in 3 days
   const maxMintable = 1326                           // Max a single user can mint. Recommend leaving for simulation
+
+  const gnuPlotConf = `set datafile separator ','
+set terminal png size 2000,600
+set output 'price_per_block.png'
+set key autotitle columnhead
+set ylabel "Price ETH"
+set xlabel "Block #"
+set y2tics
+set ytics nomirror
+set y2label "EMS"
+plot 'price_per_block.csv' using 1:2 with lines, '' using 1:3 with lines axis x1y2, '' using 1:4 with lines axis x1y2
+`
 
   // ----------
   // Simulation
@@ -46,19 +69,46 @@ module.exports = async function(callback) {
     )
   }
 
+  const paramsOut = `
+targetBlocksPerSale:   ${targetBlocksPerSale}
+saleHalflife:          ${saleHalflife}
+priceSpeed:            ${priceSpeed}
+priceSpeedDenominator: ${priceSpeedDenominator}
+priceHalflife:         ${priceHalflife}
+startingPrice:         ${startingPrice}
+priceThreshold:        ${priceThreshold}
+waitForDropHigh:       ${waitForDropHigh}
+waitForDropLow:        ${waitForDropLow}
+blocksToMine:          ${blocksToMine}
+`
+
   console.log("Simulation Parameters")
   console.log("---------------------")
-  console.log(`targetBlocksPerSale:   ${targetBlocksPerSale}`)
-  console.log(`saleHalflife:          ${saleHalflife}`)
-  console.log(`priceSpeed:            ${priceSpeed}`)
-  console.log(`priceSpeedDenominator: ${priceSpeedDenominator}`)
-  console.log(`priceHalflife:         ${priceHalflife}`)
-  console.log(`startingPrice:         ${startingPrice}`)
-  console.log(`priceThreshold:        ${priceThreshold}`)
-  console.log(`blocksToMine:          ${blocksToMine}`)
-  console.log("")
+  console.log(paramsOut)
   console.log("Start simulation")
   console.log("")
+
+  const baseDataPath = path.resolve( __dirname, "data/sim" )
+  if(fs.existsSync(baseDataPath)) {
+    fs.rmSync(baseDataPath, {force: true, recursive: true})
+  }
+
+  await fs.promises.mkdir( baseDataPath, { recursive: true } )
+  const pricePerBlockDumpPath = path.resolve(baseDataPath, "price_per_block.csv")
+  const pricePerSaleDumpPath = path.resolve(baseDataPath, "price_per_sale.csv")
+  const paramsDumpPath = path.resolve(baseDataPath, "params.txt")
+  const saleStatsDumpPath = path.resolve(baseDataPath, "sales_stats.txt")
+  const gnuPlotPath = path.resolve(baseDataPath, "sim.gnuplot")
+
+  console.log(`price per block : ${pricePerBlockDumpPath}`)
+  console.log(`price per sale  : ${pricePerSaleDumpPath}`)
+  console.log(`params          : ${paramsDumpPath}`)
+  console.log(`sales stats     : ${saleStatsDumpPath}`)
+
+  fs.writeFileSync( pricePerBlockDumpPath, "block,price,ems,target ems\n" )
+  fs.writeFileSync( pricePerSaleDumpPath, "block,num bought,price per nft,total price\n" )
+  fs.writeFileSync( paramsDumpPath, paramsOut )
+  fs.writeFileSync( gnuPlotPath, gnuPlotConf)
 
   try {
     const startPriceWei = web3.utils.toWei(String(startingPrice), "ether")
@@ -82,9 +132,10 @@ module.exports = async function(callback) {
     console.log("HEH deployed to", holdemHeroes.address)
 
     const accounts = await web3.eth.getAccounts()
-    const admin = accounts[0]
 
     const initialPrice = await holdemHeroes.getNftPrice()
+
+    const targetEms = await holdemHeroes.targetEMS()
 
     console.log("initialPrice", web3.utils.fromWei(initialPrice))
 
@@ -93,43 +144,85 @@ module.exports = async function(callback) {
 
     console.log("begin minting sim")
 
-    for(let i = 0; i < 1326; i += 1) {
+    let totalSupply = (await holdemHeroes.totalSupply()).toNumber()
+    let totalSales = new BN(0)
+
+    // mint & mine until supply runs out
+    while(totalSupply < numberToSell) {
       let blockNum = await web3.eth.getBlockNumber()
       let pricePerNft = await holdemHeroes.getNftPrice()
-      console.log("token", i, "blockNum", blockNum.toString(), "price", web3.utils.fromWei(pricePerNft))
+      let ems = (blockNum >= saleStart) ? await holdemHeroes.getCurrentEMS() : 0
+      let dataDump = `${blockNum.toString()},${web3.utils.fromWei(pricePerNft)},${ems},${targetEms.toString()}`
+      fs.appendFileSync( pricePerBlockDumpPath, dataDump + "\n" )
+      console.log(`${dataDump},${totalSupply}`)
 
       if(Number(web3.utils.fromWei(pricePerNft)) > priceThreshold) {
-        console.log(`price above threshold ${priceThreshold} ETH. mine blocks until it drops`)
-        while(Number(web3.utils.fromWei(pricePerNft)) >= priceThreshold) {
+        const waitForDrop = (Math.random() * (waitForDropHigh - waitForDropLow) + waitForDropLow).toFixed(4)
+        console.log(`price above threshold ${priceThreshold}. Mine blocks until < ${waitForDrop}`)
+        while(Number(web3.utils.fromWei(pricePerNft)) >= waitForDrop) {
           await mineOneBlock()
           blockNum = await web3.eth.getBlockNumber()
           pricePerNft = await holdemHeroes.getNftPrice()
-          console.log("token", i, "blockNum", blockNum.toString(), "price",web3.utils.fromWei(pricePerNft))
+          let ems = (blockNum >= saleStart) ? await holdemHeroes.getCurrentEMS() : 0
+          let dataDump = `${blockNum.toString()},${web3.utils.fromWei(pricePerNft)},${ems},${targetEms.toString()}`
+          fs.appendFileSync( pricePerBlockDumpPath, dataDump + "\n" )
+          console.log(`${dataDump},${totalSupply}`)
         }
-        console.log(`price below threshold ${priceThreshold} ETH. Continue minting`)
       }
 
-      const m = i % accounts.length
+      const m = blockNum % accounts.length
+      let numToMint = Math.floor(Math.random() * 6)
+      numToMint = numToMint > 0 ? numToMint : 1
+      if(numToMint + totalSupply > 1326) {
+        numToMint = 1326 - totalSupply
+      }
 
-      await holdemHeroes.mintNFTPreReveal( 1, { from: accounts[m], value: pricePerNft })
+      const cost = pricePerNft.mul(new BN(numToMint))
+      totalSales = totalSales.add(cost)
 
-      // otherwise minters may run out of ETH during est
-      await holdemHeroes.withdrawETH( { from: admin })
-      await web3.eth.sendTransaction({to:accounts[m], from: admin, value: pricePerNft})
+      console.log(`Mint ${numToMint}`)
+      fs.appendFileSync( pricePerSaleDumpPath, `${blockNum},${numToMint},${web3.utils.fromWei(pricePerNft.toString())},${web3.utils.fromWei(cost.toString())}` + "\n" )
+
+      await holdemHeroes.mintNFTPreReveal( numToMint, { from: accounts[m], value: cost })
 
       const randBlockToMin = Math.floor(Math.random() * blocksToMine)
-
       if(randBlockToMin > 0) {
+        console.log(`Mine ${randBlockToMin} blocks`)
         for(let j = 0; j < randBlockToMin; j += 1) {
-          process.stdout.write(".")
           await mineOneBlock()
+          blockNum = await web3.eth.getBlockNumber()
+          pricePerNft = await holdemHeroes.getNftPrice()
+          let ems = (blockNum >= saleStart) ? await holdemHeroes.getCurrentEMS() : 0
+          let dataDump = `${blockNum.toString()},${web3.utils.fromWei(pricePerNft)},${ems},${targetEms.toString()}`
+          fs.appendFileSync( pricePerBlockDumpPath, dataDump + "\n" )
+          console.log(`${dataDump},${totalSupply}`)
         }
-        console.log("")
       }
 
+      totalSupply = (await holdemHeroes.totalSupply()).toNumber()
     }
 
     console.log("Simulation finished")
+    const lastBlock = await web3.eth.getBlockNumber()
+    const numBlocks = lastBlock - saleStart
+    const finalTotalSupply = await holdemHeroes.totalSupply()
+    const meanSale = totalSales.div(finalTotalSupply)
+    const blockerPerSale = numBlocks / finalTotalSupply.toNumber()
+    const salesPerBlock = finalTotalSupply.toNumber() / numBlocks
+
+    const saleStats = `
+Target EMS         : ${targetEms.toString()}
+Num sold           : ${finalTotalSupply.toString()}
+Total sales in ETH : ${Web3.utils.fromWei(totalSales.toString())}
+Mean Price Per NFT : ${Web3.utils.fromWei(meanSale.toString())}
+Num Blocks         : ${numBlocks}
+Blocks per sale    : ${blockerPerSale}
+Sales per block    : ${salesPerBlock}
+`
+
+    fs.writeFileSync(saleStatsDumpPath, saleStats)
+    console.log(saleStats)
+
     callback()
 
   } catch(e) {

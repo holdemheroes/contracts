@@ -20,15 +20,28 @@ yarn test
 docker build -t heh-crisp-sim -f ./docker/sim.Dockerfile .
 ```
 
-3. Run the container:
+3. If the simulation has been run before, remove the container
 
 ```bash
-docker run -it heh-crisp-sim
+docker rm /heh-crisp-sim
 ```
 
-Use `Ctrl-C` to halt the simulation.
+4. Run the container:
 
-If parameters are modified in the script, re-run the `docker build` in #2 before running again.
+```bash
+docker run -it --name heh-crisp-sim heh-crisp-sim
+```
+
+Use `Ctrl-C` to halt the simulation, or let it run until the end.
+
+If parameters are modified in the script, re-run the `docker build` in #2, and delete the container as per #3
+before running again.
+
+Finally, copy the data, including the generated `gnuplot` graph from the container for a completed simulation:
+
+```bash
+mkdir -p ./data/tmp/sim && docker cp heh-crisp-sim:root/sim/data/ ./data/tmp/sim
+```
 
 ## Deployment
 

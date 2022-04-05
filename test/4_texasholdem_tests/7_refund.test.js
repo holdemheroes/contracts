@@ -168,7 +168,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -260,7 +260,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -385,7 +385,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -453,7 +453,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -499,7 +499,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(1))
+      expect(game.status).to.be.bignumber.eq(new BN(7))
     })
 
     it("game is no longer in progress", async function() {
@@ -510,7 +510,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should still exist", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.status).to.be.bignumber.eq(new BN(3)) // GameStatus.TURN_WAIT
+      expect(game.status).to.be.bignumber.eq(new BN(7)) // GameStatus.REFUNDABLE
     })
 
     for ( let i = 0; i < numPlayers; i += 1 ) {
@@ -632,7 +632,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -697,7 +697,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -745,7 +745,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(1))
+      expect(game.status).to.be.bignumber.eq(new BN(7))
     })
 
     it("game is no longer in progress", async function() {
@@ -756,7 +756,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should still exist", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.status).to.be.bignumber.eq(new BN(4)) // GameStatus.TURN_DEALT
+      expect(game.status).to.be.bignumber.eq(new BN(7)) // GameStatus.REFUNDABLE
     })
 
     for ( let i = 0; i < numPlayers; i += 1 ) {
@@ -893,7 +893,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -931,7 +931,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("game is not stale yet", async function() {
@@ -966,7 +966,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -1012,7 +1012,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(1))
+      expect(game.status).to.be.bignumber.eq(new BN(7))
     })
 
     it("game is no longer in progress", async function() {
@@ -1023,7 +1023,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should still exist", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.status).to.be.bignumber.eq(new BN(5)) // GameStatus.RIVER_WAIT
+      expect(game.status).to.be.bignumber.eq(new BN(7)) // GameStatus.REFUNDABLE
     })
 
     for ( let i = 0; i < numPlayers; i += 1 ) {
@@ -1161,7 +1161,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -1199,7 +1199,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("game is not stale yet", async function() {
@@ -1231,7 +1231,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should not yet be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(0))
+      expect(game.status).to.be.bignumber.not.eq(new BN(7))
     })
 
     it("cannot claimRefund if not in refundable state", async function() {
@@ -1279,7 +1279,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should be in refundable state", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.refundable).to.be.bignumber.eq(new BN(1))
+      expect(game.status).to.be.bignumber.eq(new BN(7))
     })
 
     it("game is no longer in progress", async function() {
@@ -1290,7 +1290,7 @@ contract("TexasHoldemV1 - play", async function(accounts) {
 
     it("game should still exist", async function() {
       const game = await this.texasHoldem.games(gameId)
-      expect(game.status).to.be.bignumber.eq(new BN(6)) // GameStatus.RIVER_DEALT
+      expect(game.status).to.be.bignumber.eq(new BN(7)) // GameStatus.REFUNDABLE
     })
 
     for ( let i = 0; i < numPlayers; i += 1 ) {

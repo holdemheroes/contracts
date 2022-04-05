@@ -104,7 +104,7 @@ contract("TexasHoldemV1 - play simple single player", async function(accounts) {
     await this.holdemHeroes.mint( riverTest1CardsDealt, { from: accounts[0] } )
     await this.holdemHeroes.mint(notOwnToken, { from: accounts[1] })
 
-    // subscrive to phe
+    // subscribe to phe
     await this.pokerHandEvaluator.ownerAddSubscriber(this.texasHoldem.address, {from: accounts[0]})
 
     const ts = await this.holdemHeroes.totalSupply()

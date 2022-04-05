@@ -26,7 +26,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     IHoldemHeroes public immutable holdemHeroes;
     IPokerHandEvaluator public handEvaluator;
 
-    enum GameStatus { NOT_EXIST, FLOP_WAIT, FLOP_DEALT, TURN_WAIT, TURN_DEALT, RIVER_WAIT, RIVER_DEALT }
+    enum GameStatus { NOT_EXIST, FLOP_WAIT, FLOP_DEALT, TURN_WAIT, TURN_DEALT, RIVER_WAIT, RIVER_DEALT, REFUNDABLE }
 
     struct Player {
         mapping(uint256 => bool) flopTokens;
@@ -47,7 +47,6 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
         uint32 gameRoundTimeSeconds;
         uint16 numPlayersInRound;
         uint16 leaderboardSize;
-        uint8 refundable;
         uint8 numCardsDealt;
         GameStatus status;
         uint8[] deck; // deck of cards
@@ -256,6 +255,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     }
 
     function addNFT(uint256 _tokenId, uint256 _gameId, GameStatus _roundAddingFor, uint256 _expectedFee) private {
+        require(games[_gameId].status != GameStatus.REFUNDABLE, "game refundable!");
         require(block.timestamp < games[_gameId].roundEndTime, "round ended");
         // get hand data from holdemHeroes
         (uint16 handId, uint8 card1, uint8 card2) = getTokenDataWithHandId(_tokenId);
@@ -286,6 +286,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     }
 
     function playFinalHand(uint256 _tokenId, uint8[] memory cardIds, uint256 _gameId) public {
+        require(games[_gameId].status != GameStatus.REFUNDABLE, "game refundable!");
         // get hand data from holdemHeroes
         (uint16 handId, uint8 card1, uint8 card2) = getTokenDataWithHandId(_tokenId);
         require(cardIds.length == 3, "must submit 3 cards from river");
@@ -341,6 +342,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     }
 
     function requestDeal(uint256 _gameId) public nonReentrant onlyRole(DEALER_ROLE) {
+        require(games[_gameId].status != GameStatus.REFUNDABLE, "game refundable!");
         // check not currently dealing
         // call VOR
         require(
@@ -363,21 +365,18 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
         requestIdToGameId[requestId] = _gameId;
     }
 
+    function handbrake(uint256 _gameId) external onlyOwner {
+        require(games[_gameId].status != GameStatus.NOT_EXIST, "does not exist");
+        // prevent handbrake if there have been final hands played!
+        if(games[_gameId].status == GameStatus.RIVER_DEALT) {
+            require(games[_gameId].numPlayersInRound == 0, "cannot handbrake when final hands exist");
+        }
+        _endGame(_gameId);
+    }
+
     function endGame(uint256 _gameId) external nonReentrant {
         if(gameIsStale(_gameId)) {
-            if(games[_gameId].status == GameStatus.FLOP_WAIT ||
-                (games[_gameId].status == GameStatus.FLOP_DEALT &&
-                 games[_gameId].numPlayersInRound == 0)) {
-                // nothing happened - no players. Just delete game and
-                // remove from gamesInProgress array
-                cleanupGame(_gameId, true, true);
-            } else {
-                games[_gameId].refundable = 1;
-                emit RefundableGame(_gameId);
-                // only remove from gamesInProgress array. The game object
-                // is required for users to claim refunds
-                cleanupGame(_gameId, false, true);
-            }
+            _endGame(_gameId);
         } else {
             require(
                 games[_gameId].status == GameStatus.RIVER_DEALT &&
@@ -388,9 +387,25 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
         }
     }
 
+    function _endGame(uint256 _gameId) internal {
+        if(games[_gameId].status == GameStatus.FLOP_WAIT ||
+            (games[_gameId].status == GameStatus.FLOP_DEALT &&
+            games[_gameId].numPlayersInRound == 0)) {
+            // nothing happened - no players. Just delete game and
+            // remove from gamesInProgress array
+            cleanupGame(_gameId, true, true);
+        } else {
+            games[_gameId].status = GameStatus.REFUNDABLE;
+            emit RefundableGame(_gameId);
+            // only remove from gamesInProgress array. The game object
+            // is required for users to claim refunds
+            cleanupGame(_gameId, false, true);
+        }
+    }
+
     // if game is stale, users can claim refund
     function claimRefund(uint256 _gameId) external {
-        require(games[_gameId].refundable == 1, "game not refundable!");
+        require(games[_gameId].status == GameStatus.REFUNDABLE, "game not refundable!");
         uint256 paidIn = games[_gameId].players[msg.sender].paidIn;
         require(paidIn > 0, "nothing paid in");
         require(games[_gameId].totalPaidIn.sub(paidIn) >= 0, "not enough in totalPaidIn");
@@ -411,7 +426,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     function calculateWinnings(uint256 _gameId) internal {
         Game storage game = games[_gameId];
         require(game.totalPaidIn > 0, "nothing in totalPaidIn");
-        require(game.refundable == 0, "game refundable!");
+        require(game.status != GameStatus.REFUNDABLE, "game refundable!");
 
         // calculate winnings from claimPot
         (uint8 numWinners, uint256 claimPot, uint256 jackpotSplit, uint256 houseClaim, uint256 runnerUpShare) = getPotSplit(_gameId);
@@ -498,15 +513,19 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
             delete games[_gameId];
         }
         if(removeFromGamesInProgress) {
+            bool pop = false;
             if(gamesInProgress.length > 1) {
                 for (uint i = 0; i < gamesInProgress.length; i++){
                     if(gamesInProgress[i] == _gameId) {
                         gamesInProgress[i] = gamesInProgress[gamesInProgress.length-1];
+                        pop = true;
                         break;
                     }
                 }
             }
-            gamesInProgress.pop();
+            if(pop || (gamesInProgress.length == 1 && gamesInProgress[0] == _gameId)) {
+                gamesInProgress.pop();
+            }
         }
     }
 

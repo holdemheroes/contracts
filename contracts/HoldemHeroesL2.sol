@@ -6,7 +6,6 @@ import "./HoldemHeroesBase.sol";
 
 
 contract HoldemHeroesL2 is Ownable, HoldemHeroesBase  {
-
     // Contract address for the L1 HEH deployment
     address public parentChainContractAddress;
     uint256 public parentNetworkId;
@@ -43,5 +42,4 @@ contract HoldemHeroesL2 is Ownable, HoldemHeroesBase  {
             _safeMint(_owners[i], _tokenIds[i]);
         }
     }
-
 }

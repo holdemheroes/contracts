@@ -10,11 +10,12 @@ module.exports = function(deployer, network) {
     let parentHeh
     let startIdx
     let parentNetworkId
+    const playingCardsAddress = contractAddresses[network].playing_cards
 
     switch (network) {
       case "polygon_mumbai":
         parentHeh = contractAddresses["rinkeby"].holdem_heroes_nft
-        startIdx = 1078
+        startIdx = 232
         parentNetworkId = 4
         break
       case "polygon":
@@ -32,6 +33,7 @@ module.exports = function(deployer, network) {
       startIdx,
       parentHeh,
       parentNetworkId,
+      playingCardsAddress,
     )
 
     if(contractAddresses[network]) {

@@ -12,6 +12,9 @@ module.exports = async function(callback) {
   const admin = accounts[0]
   const dealer = process.argv[4]
 
+  console.log(`TH Contract: ${th.address}`)
+  console.log(`dealer: ${dealer}`)
+
   try {
 
     const DEALER_ROLE = await th.DEALER_ROLE()

@@ -25,6 +25,7 @@ module.exports = async function(callback) {
     for(let i = 0; i < airdrop.batches.length; i += 1) {
       const b = airdrop.batches[i]
 
+      console.log(`process batch id ${i}`)
       /// ToDo - check done_batches and skip if required
 
       const tx = await holdemHeroes.airdrop( b.tokenIds, b.owners, {

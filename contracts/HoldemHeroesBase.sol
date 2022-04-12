@@ -18,7 +18,7 @@ contract HoldemHeroesBase is ERC721Enumerable, Ownable  {
     uint256 public constant MAX_NFT_SUPPLY = 1326; // final totalSupply of NFTs
 
     // sha256 hash of all generated and shuffled hands
-    bytes32 public constant HAND_PROVENANCE = 0x0f2f589f7a4a8f583e3053d84ac5b827445dc51d60f1fd4dcf3023ddf2507515;
+    bytes32 public constant HAND_PROVENANCE = 0x0a2d4578d678805b01ca1c17ac08dc2bf12be49480d281e20c35793575eddf7c;
 
     // start index for mapping tokenId on to handId - set during the distribution phase
     uint256 public startingIndex;

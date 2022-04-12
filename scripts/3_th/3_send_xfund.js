@@ -11,6 +11,9 @@ module.exports = async function(callback) {
   const admin = accounts[0]
   const amount = process.argv[4]
 
+  console.log(`TH Contract: ${th.address}`)
+  console.log(`xFUND Contract: ${netConfigs.networks[network].addresses.xfund}`)
+
   try {
 
     const balanceBefore = await xfund.methods.balanceOf(th.address).call()

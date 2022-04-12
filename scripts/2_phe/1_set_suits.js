@@ -12,6 +12,13 @@ module.exports = async function(callback) {
     const phe = await PokerHandEvaluator.deployed()
     const accounts = await web3.eth.getAccounts()
     const admin = accounts[0]
+    const network = config.network
+    let waitSecs = 16
+    if(network === 'polygon' || network === 'polygon_mumbai') {
+      waitSecs = 6
+    }
+
+    console.log(`PHE Contract: ${phe.address}`)
 
     let suitsSet = await phe.suitsSet()
 
@@ -30,8 +37,8 @@ module.exports = async function(callback) {
     console.log( `tx sent`, tx.tx, tx.receipt.gasUsed )
 
     console.log("wait 1 block and check")
-    for(let i = 0; i < 17; i += 1) {
-      process.stdout.write(`${16-i}.`)
+    for(let i = 0; i <= waitSecs; i += 1) {
+      process.stdout.write(`${waitSecs-i}.`)
       await sleepFor(1000)
     }
     console.log(" checking")

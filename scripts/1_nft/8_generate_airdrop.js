@@ -7,6 +7,8 @@ const HoldemHeroes = artifacts.require("HoldemHeroes")
 module.exports = async function(callback) {
 
   const network = config.network
+  const accounts = await web3.eth.getAccounts()
+  const admin = accounts[0]
   let targetNetwork = ""
   let startFromBlock = 0
   const batchSize = 50
@@ -26,7 +28,7 @@ module.exports = async function(callback) {
   switch(network) {
     case "rinkeby":
       targetNetwork = "polygon_mumbai"
-      startFromBlock = 9417934	 // block contract was created
+      startFromBlock = 10456149	 // block contract was created
       airdropDump.parentId = 4
       break
     case "mainnet":
@@ -60,6 +62,7 @@ module.exports = async function(callback) {
 
       for(let i = 0; i < mints.length; i += 1) {
         const m = mints[i]
+        console.log(`Token #${m.returnValues.tokenId} - ${m.returnValues.to}`)
         tokenIds.push(m.returnValues.tokenId)
         owners.push(m.returnValues.to)
         console.log(`${m.returnValues.to} minted #${m.returnValues.tokenId}`)
@@ -72,6 +75,16 @@ module.exports = async function(callback) {
     const totalSupply = await holdemHeroes.totalSupply()
 
     console.log("totalSupply", totalSupply.toString())
+
+    if(totalSupply.toNumber() < 1326) {
+      console.log("not all tokens sold. Airdrop unminted to admin wallet")
+      for(let u = 0; u < 1326; u += 1) {
+        if(!tokenIds.includes(String(u))) {
+          tokenIds.push(String(u))
+          owners.push(admin)
+        }
+      }
+    }
 
     let batchId = 0
 

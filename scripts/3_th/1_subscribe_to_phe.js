@@ -13,6 +13,9 @@ module.exports = async function(callback) {
   const accounts = await web3.eth.getAccounts()
   const admin = accounts[0]
 
+  console.log(`PHE Contract: ${phe.address}`)
+  console.log(`TH Contract: ${th.address}`)
+
   try {
     let tx = await phe.ownerAddSubscriber( th.address, {
       from: admin,

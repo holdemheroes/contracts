@@ -6,24 +6,7 @@
         "vor": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
       },
       "vor_key_hash": "0x1a7a24165e904cb38eb8344affcf8fdee72ac11b5c542428b35eef5769c409f0",
-      "vor_fee": "100000000",
-      "whitelist": [
-        "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
-        "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
-        "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b",
-        "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d",
-        "0xd03ea8624C8C5987235048901fB614fDcA89b117",
-        "0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC",
-        "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9",
-        "0x28a8746e75304c0780E011BEd21C72cD78cd535E",
-        "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E",
-        "0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e",
-        "0x610Bb1573d1046FCb8A70Bbbd395754cD57C2b60",
-        "0x855FA758c77D68a04990E992aA4dcdeF899F654A",
-        "0xfA2435Eacf10Ca62ae6787ba2fB044f8733Ee843",
-        "0x64E078A8Aa15A41B85890265648e965De686bAE6",
-        "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598"
-      ]
+      "vor_fee": "100000000"
     },
     "develop": {
       "addresses": {
@@ -31,8 +14,7 @@
         "vor": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
       },
       "vor_key_hash": "0x1a7a24165e904cb38eb8344affcf8fdee72ac11b5c542428b35eef5769c409f0",
-      "vor_fee": "100000000",
-      "whitelist": []
+      "vor_fee": "100000000"
     },
     "development": {
       "addresses": {
@@ -40,8 +22,7 @@
         "vor": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
       },
       "vor_key_hash": "0x1a7a24165e904cb38eb8344affcf8fdee72ac11b5c542428b35eef5769c409f0",
-      "vor_fee": "100000000",
-      "whitelist": []
+      "vor_fee": "100000000"
     },
     "test": {
       "addresses": {
@@ -49,8 +30,7 @@
         "vor": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
       },
       "vor_key_hash": "0x1a7a24165e904cb38eb8344affcf8fdee72ac11b5c542428b35eef5769c409f0",
-      "vor_fee": "100000000",
-      "whitelist": []
+      "vor_fee": "100000000"
     },
     "soliditycoverage": {
       "addresses": {
@@ -58,8 +38,7 @@
         "vor": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
       },
       "vor_key_hash": "0x1a7a24165e904cb38eb8344affcf8fdee72ac11b5c542428b35eef5769c409f0",
-      "vor_fee": "100000000",
-      "whitelist": []
+      "vor_fee": "100000000"
     },
     "rinkeby": {
       "addresses": {
@@ -67,19 +46,7 @@
         "vor": "0x6d5Ba663dDCa573557c8420256Dc85F31D9762B0"
       },
       "vor_key_hash": "0x91c07383e58d6a27a1e8d89806b5959c3d8212a5718c4b5d6827aa7b2f29e2d5",
-      "vor_fee": "1000000",
-      "whitelist": [
-        "0xD9EaE9dDD6952349883e2168616Ef434B21DDd6C",
-        "0x6e2A22af2a0cc7905b3543c72486057A9f67cA87",
-        "0x64B2D8822976Ed82934D595995e9983856D37264",
-        "0x134B422c75E9528D1b0689583f1FFCc2523C4c05",
-        "0xad028c2DAee42aB93a96186bfa1f7BDF0DC518Be",
-        "0x865cBeb5C60Bf132D5AF3282f00Df51C9B42608c",
-        "0x8D3541C259AaF1033b6451f516C2BB04DdCdAb95",
-        "0xd5FA636c7cc092F387671c7F75B9d976dC386690",
-        "0x4dB37bBaa13F53207E6E1C1F1b155E4785A5f47C",
-        "0x5cae4a2C32CEBf91F27D80f3474FB311a41C7e2e"
-      ]
+      "vor_fee": "1000000"
     },
     "mainnet": {
       "addresses": {
@@ -87,8 +54,7 @@
         "vor": "0xCeB679DE692660dD701837c25a4181492050ED8F"
       },
       "vor_key_hash": "0xb8bcbaa499efb630f6e86cc10181c847ce74b4f3201d10867acb1180e5961cf4",
-      "vor_fee": "250000000",
-      "whitelist": []
+      "vor_fee": "25000000"
     },
     "polygon_mumbai": {
       "addresses": {
@@ -96,8 +62,15 @@
         "vor": "0xc12678b997ce94e9f3921B65AD144565dC20Aefc"
       },
       "vor_key_hash": "0x91c07383e58d6a27a1e8d89806b5959c3d8212a5718c4b5d6827aa7b2f29e2d5",
-      "vor_fee": "1000",
-      "whitelist": []
+      "vor_fee": "1000"
+    },
+    "polygon": {
+      "addresses": {
+        "xfund": "0x77a3840f78e4685afaf9c416b36e6eae6122567b",
+        "vor": "0x9e84d9DB70fb5767f7bD2A7013C189b4CA8CC374"
+      },
+      "vor_key_hash": "0xb8bcbaa499efb630f6e86cc10181c847ce74b4f3201d10867acb1180e5961cf4",
+      "vor_fee": "1000000"
     }
   },
   "abis":{

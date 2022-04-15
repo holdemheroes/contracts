@@ -15,7 +15,7 @@ module.exports = async function(callback) {
   console.log("distribute")
   try {
     let tx = await xfund.methods.transfer(holdemHeroes.address, netConfigs.networks[network].vor_fee).send({from: admin})
-    console.log("transfer tx sent", tx.transactionHash)
+    console.log("transfer xfund tx sent", tx.transactionHash)
     tx = await holdemHeroes.beginDistribution( netConfigs.networks[network].vor_key_hash,  netConfigs.networks[network].vor_fee, {from: admin})
     if(tx.tx) {
       console.log( "beginDistribution tx sent", tx.tx, tx.receipt.gasUsed )

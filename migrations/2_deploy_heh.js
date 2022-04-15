@@ -8,9 +8,9 @@ module.exports = function(deployer, network) {
   deployer.then(async () => {
 
     // TODO - SET THESE VALUES FOR TARGET NETWORK
-    const saleStartBlockNum = 10456150 // block 0
-    const revealTimestamp = Math.floor(Date.now() / 1000) + 86400 // in 24 hours
-    const maxNftsPerTxOrAddress = 1326 // 1326 for Rinkeby/Vordev ONLY. For MN, use 6
+    const saleStartBlockNum = 10501810 // block #
+    const revealTimestamp = 1650009600 // Unix epoch, or Math.floor(Date.now() / 1000) + 86400
+    const maxNftsPerTxOrAddress = 1326 // For MN, use 6!! 1326 for Rinkeby/Vordev ONLY!!
 
     // CRISP
     const targetBlocksPerSale = 14

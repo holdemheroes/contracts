@@ -22,7 +22,7 @@ require('dotenv').config()
 // const TestRPC = require("ganache-cli")
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
-const { ETH_PKEY, INFURA_PROJECT_ID, ETHERSCAN_API_KEY } = process.env
+const { ETH_PKEY_TN, ETH_PKEY_MN, INFURA_PROJECT_ID, ETHERSCAN_API_KEY } = process.env
 
 module.exports = {
   /**
@@ -50,7 +50,7 @@ module.exports = {
     rinkeby: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY],
+          privateKeys: [ETH_PKEY_TN],
           providerOrUrl: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "4",
@@ -61,7 +61,7 @@ module.exports = {
     mainnet: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY],
+          privateKeys: [ETH_PKEY_MN],
           providerOrUrl: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "1",
@@ -70,12 +70,21 @@ module.exports = {
     polygon_mumbai: {
       provider: () =>
         new HDWalletProvider({
-          privateKeys: [ETH_PKEY],
+          privateKeys: [ETH_PKEY_TN],
           providerOrUrl: `https://polygon-mumbai.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "80001",
       gasPrice: 3000000000,
       skipDryRun: true,
+    },
+    polygon: {
+      provider: () =>
+        new HDWalletProvider({
+          privateKeys: [ETH_PKEY_MN],
+          providerOrUrl: `https://polygon-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
+        }),
+      network_id: "137",
+      gasPrice: 3000000000,
     }
   },
 
@@ -109,7 +118,7 @@ module.exports = {
           enabled: true,
           runs: 200
         },
-        evmVersion: "constantinople"
+        evmVersion: "istanbul"
       }
     }
   },

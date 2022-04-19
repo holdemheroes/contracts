@@ -48,6 +48,14 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       expect(ranksUploaded).to.be.equal(true)
     })
 
+    it("can setBasePostRevealPrice", async function () {
+      const basePriceBefore = await this.holdemHeroes.basePostRevealPrice()
+      expect(basePriceBefore).to.be.bignumber.eq(new BN("1000000000000000000"))
+      await this.holdemHeroes.setBasePostRevealPrice("24")
+      const basePrice = await this.holdemHeroes.basePostRevealPrice()
+      expect(basePrice).to.be.bignumber.eq(new BN("24"))
+    })
+
     it("can withdraw eth", async function () {
       const saleStartBlockNum = 0
       const playingCards = await PlayingCards.new()
@@ -157,6 +165,13 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       )
     })
 
+    it("only owner can setBasePostRevealPrice", async function () {
+      await expectRevert(
+        this.holdemHeroes.setBasePostRevealPrice("24", { from: accounts[1] }),
+        "Ownable: caller is not the owner",
+      )
+    })
+
     it("only owner can uploadHandRanks", async function () {
       const rankData = getRanksForUpload()
       await expectRevert(
@@ -228,7 +243,7 @@ contract("HoldemHeroes - init & admin", async function(accounts) {
       )
     })
 
-    it("only admin can withdraw eth", async function () {
+    it("only owner can withdraw eth", async function () {
       await expectRevert(
         this.holdemHeroes.withdrawETH({ from: accounts[1]}),
         "Ownable: caller is not the owner",

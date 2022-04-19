@@ -15,6 +15,8 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
     // block number for when public sale opens
     uint256 public SALE_START_BLOCK_NUM;
 
+    uint256 public basePostRevealPrice = 1 ether;
+
     /// ---------------------------
     /// ------- CRISP STATE -------
     /// ---------------------------
@@ -120,6 +122,19 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
     }
 
     /*
+     * ADMIN
+     */
+
+    /**
+     * @dev setBasePostRevealPrice allows owner to adjust post-reveal price according to market
+     *
+     * @param newPrice uint256 new base price in wei
+     */
+    function setBasePostRevealPrice(uint256 newPrice) external onlyOwner {
+        basePostRevealPrice = newPrice;
+    }
+
+    /*
      * CRISP FUNCTIONS
      */
 
@@ -166,6 +181,25 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
     function getNftPrice() public view returns (uint256 result) {
         int256 pricePerNft = _getNftPrice();
         result = uint256(pricePerNft.toInt());
+    }
+
+    /**
+     * @dev getPostRevealNftPrice get mint price for revealed tokens, based on the hand Rank
+     * @dev lower rank = better hand = higher price. e.g. AA = rank 1 = high price
+     * @dev Note - this can only be used in the event that there are unminted tokens
+     * @dev once the pre-reveal sale has ended.
+     *
+     * @return result uint256 price in wei
+     */
+    function getPostRevealNftPrice(uint256 _tokenId) public view returns (uint256 result) {
+        uint256 rank = uint256(getHandRank(tokenIdToHandId(_tokenId)));
+        if(rank == 1) {
+            result = basePostRevealPrice;
+        } else {
+            uint256 m = 100 - ((rank * 100) / 169); // get % as int
+            m = (m < 10) ? 10 : m;
+            result = (basePostRevealPrice * m) / 100;
+        }
     }
 
     /**
@@ -258,20 +292,10 @@ contract HoldemHeroes is Ownable, HoldemHeroesBase, VORConsumerBase  {
      * @param tokenId uint256 NFT Token ID to purchase
      */
     function mintNFTPostReveal(uint256 tokenId) external payable {
-        require(REVEALED, "not revealed");
-        require(startingIndex > 0, "not distributed");
-        require(tokenId >= 0 && tokenId < MAX_NFT_SUPPLY, "invalid id");
-
-        int256 price = _getNftPrice();
-        uint256 priceScaled = uint256(price.toInt());
-
-        require(msg.value >= priceScaled, "eth too low");
+        uint256 price = getPostRevealNftPrice(tokenId);
+        require(msg.value >= price, "eth too low");
 
         _safeMint(msg.sender, tokenId);
-
-        //update CRISP state
-        updateCrispState(price, 1);
-
     }
 
     /**

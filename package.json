@@ -8,7 +8,7 @@
     "url": "git+https://github.com/holdemheroes/contracts.git"
   },
   "author": "",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/holdemheroes/contracts/issues"
   },

@@ -21,6 +21,7 @@
     "abis": "node scripts/utils/write_abis.js",
     "abigen": "truffle run abigen TexasHoldemV1 HoldemHeroes",
     "ganache": "yarn run ganache-cli --deterministic",
+    "flatten": "node scripts/utils/flatten-contracts.js",
     "migrate:cards:vordev": "truffle migrate -f 1 --to 1 --network vordev",
     "migrate:cards:ganache": "truffle migrate -f 1 --to 1 --network develop",
     "migrate:cards:rinkeby": "truffle migrate -f 1 --to 1 --network rinkeby",
@@ -59,6 +60,7 @@
     "ethers": "^5.4.7",
     "minimist": "^1.2.5",
     "prb-math": "^2.4.3",
+    "truffle-flattener": "^1.6.0",
     "web3": "^1.5.3",
     "web3-providers-ws": "^1.6.0"
   },

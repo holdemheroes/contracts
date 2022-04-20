@@ -7,10 +7,10 @@ module.exports = function(deployer, network) {
   const contractAddresses = utils.getContractAddresses(network)
   deployer.then(async () => {
 
-    // TODO - SET THESE VALUES FOR TARGET NETWORK
-    const saleStartBlockNum = 10501810 // block #
-    const revealTimestamp = 1650009600 // Unix epoch, or Math.floor(Date.now() / 1000) + 86400
-    const maxNftsPerTxOrAddress = 1326 // For MN, use 6!! 1326 for Rinkeby/Vordev ONLY!!
+    // Mainnet Deployment times
+    const saleStartBlockNum = 14622300 // block # Estimated Target Date: Wed Apr 20 2022 14:02:24 GMT+0000
+    const revealTimestamp = 1650722400 // Sat Apr 23 2022 14:00:00 GMT+0000
+    const maxNftsPerTxOrAddress = 9
 
     // CRISP
     const targetBlocksPerSale = 14

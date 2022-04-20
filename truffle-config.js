@@ -65,7 +65,8 @@ module.exports = {
           providerOrUrl: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "1",
-      gasPrice: 40000000000,
+      gasPrice: 35000000000,
+      skipDryRun: true,
     },
     polygon_mumbai: {
       provider: () =>

@@ -25,5 +25,11 @@
     "vor": "0xc12678b997ce94e9f3921B65AD144565dC20Aefc",
     "hand_evaluator": "0xe50Bc17987905f8c9D54f6ef04A5B1b1d12723a7",
     "texas_holdem_v1": "0xfB3bf250007807c8416C0C3ed6F0C03159E82c53"
+  },
+  "mainnet": {
+    "playing_cards": "0xC3a3D9f2263A82b740B921FBB386eC5820FDDf9e",
+    "holdem_heroes_nft": "0x9259C39495FCC81509ab6Ff82179950c7d36735f",
+    "xfund": "0x892A6f9dF0147e5f079b0993F486F9acA3c87881",
+    "vor": "0xCeB679DE692660dD701837c25a4181492050ED8F"
   }
 }

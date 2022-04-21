@@ -19,7 +19,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     bytes32 public constant DEALER_ROLE = keccak256("DEALER_ROLE");
     uint256 public constant DEFAULT_ROUND_1_PRICE = 0.1 ether;
     uint256 public constant DEFAULT_ROUND_2_PRICE = 0.2 ether;
-    uint256 public constant HOUSE_PERC = 25; // 2.5% - we'll div(1000) instead of 100, since solidity has no floats
+    uint256 public constant HOUSE_PERC = 50; // 50 = 5% as we'll div(1000) instead of 100, since solidity has no floats
     uint8 public constant LEADERBOARD_SIZE = 11; // 1 winner + 10 runners up
     address constant GUARD = address(1);
 
@@ -471,9 +471,9 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
         uint256 _gameId) private view returns(uint8 numWinners, uint256 claimPot, uint256 jackpotSplit, uint256 houseClaim, uint256 runnerUpShare) {
 
         Game storage game = games[_gameId];
-        // calculate house's 2.5 %
+        // calculate house's %
         houseClaim = game.totalPaidIn.mul(HOUSE_PERC).div(1000);
-        // subtract house 2.5% first to make the final claim pot
+        // subtract house % first to make the final claim pot
         claimPot = game.totalPaidIn.sub(houseClaim);
 
         numWinners = 1;

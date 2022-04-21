@@ -26,10 +26,10 @@ contract("TexasHoldemV1 - play 10 players", async function(accounts) {
 
   // assumes 10 player game
   const expectedTotalPaidIn    = new BN("10000000000000000000") // 10 eth
-  const houseCut               = new BN("250000000000000000")  // 2.5% of 10000000000000000000
-  const expectedWinnerAmount   = new BN("5850000000000000000") // 60% of 9750000000000000000
-  const expectedRunnerUpAmount = new BN("433333333333333333") // 40% of 9750000000000000000 / 9
-  const expectedClaimPotRemainder  = new BN(3) // after dividing runner up pot by 9
+  const houseCut               = new BN("500000000000000000")  // 5% of 10000000000000000000
+  const expectedWinnerAmount   = new BN("5700000000000000000") // 60% of 9500000000000000000
+  const expectedRunnerUpAmount = new BN("422222222222222222") // (40% of 9500000000000000000) / 9
+  const expectedClaimPotRemainder  = new BN(2) // after dividing runner up pot by 9
   const expectedHouseCut = houseCut.add(expectedClaimPotRemainder) // remainder added, so 250000000000000003
 
   // array of token IDs safe to add in flop

@@ -32,5 +32,12 @@
     "xfund": "0x892A6f9dF0147e5f079b0993F486F9acA3c87881",
     "vor": "0xCeB679DE692660dD701837c25a4181492050ED8F",
     "provenance_ipfs_hash": "QmNm6vrWTSGCQ7w5XW2yKy95wd67jrv9xqvQBm5fnM51XV"
+  },
+  "polygon": {
+    "playing_cards": "0xC3a3D9f2263A82b740B921FBB386eC5820FDDf9e",
+    "provenance_ipfs_hash": "QmNm6vrWTSGCQ7w5XW2yKy95wd67jrv9xqvQBm5fnM51XV",
+    "holdem_heroes_nft": "0xfe54470e3e7676bA20A6FF27f0358651d0525CAa",
+    "xfund": "0x77a3840f78e4685afaf9c416b36e6eae6122567b",
+    "vor": "0x9e84d9DB70fb5767f7bD2A7013C189b4CA8CC374"
   }
 }

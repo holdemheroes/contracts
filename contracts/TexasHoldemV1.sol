@@ -2,7 +2,6 @@
 pragma solidity >=0.8.9;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@unification-com/xfund-vor/contracts/VORConsumerBase.sol";
@@ -12,7 +11,7 @@ import "./libs/uint16a4.sol";
 import "./libs/uint8a5.sol";
 
 
-contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBase  {
+contract TexasHoldemV1 is AccessControl, Ownable, VORConsumerBase  {
     using SafeMath for uint256;
 
     uint8 public constant GAME_VERSION = 1;
@@ -186,14 +185,14 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
     /**
      * @dev withdrawHouse allows contract owner to withdraw ether
      */
-    function withdrawHouse() external onlyOwner nonReentrant {
+    function withdrawHouse() external onlyOwner {
         require(houseCut > 0, "nothing to withdraw");
         emit HouseCutWithdrawn(msg.sender, houseCut);
         payable(msg.sender).transfer(houseCut);
         houseCut = 0;
     }
 
-    function withdrawWinnings() external nonReentrant {
+    function withdrawWinnings() external {
         uint256 amount = userWithdrawables[msg.sender];
         require(amount > 0, "nothing to withdraw");
         payable(msg.sender).transfer(amount);
@@ -341,8 +340,13 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
             rank);
     }
 
-    function requestDeal(uint256 _gameId) public nonReentrant onlyRole(DEALER_ROLE) {
+    function requestDeal(uint256 _gameId) public {
         require(games[_gameId].status != GameStatus.REFUNDABLE, "game refundable!");
+        require(
+            games[_gameId].players[msg.sender].lastRoundSubmitted != GameStatus.NOT_EXIST ||
+            hasRole(DEALER_ROLE, msg.sender),
+            "not dealer"
+        );
         // check not currently dealing
         // call VOR
         require(
@@ -374,7 +378,7 @@ contract TexasHoldemV1 is ReentrancyGuard, AccessControl, Ownable, VORConsumerBa
         _endGame(_gameId);
     }
 
-    function endGame(uint256 _gameId) external nonReentrant {
+    function endGame(uint256 _gameId) external {
         if(gameIsStale(_gameId)) {
             _endGame(_gameId);
         } else {

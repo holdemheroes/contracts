@@ -421,8 +421,8 @@ contract("TexasHoldemV1 - play 10 players", async function(accounts) {
 
   describe('turn', function() {
 
-    it("request deal turn...", async function () {
-      const receipt = await this.texasHoldem.requestDeal(1, {from: accounts[0]})
+    it("player5 request deal turn...", async function () {
+      const receipt = await this.texasHoldem.requestDeal(1, {from: accounts[5]})
       this.requestId = utils.getRequestId( receipt )
     })
 
@@ -604,8 +604,8 @@ contract("TexasHoldemV1 - play 10 players", async function(accounts) {
 
   describe('river', function() {
 
-    it("request deal river...", async function () {
-      const receipt = await this.texasHoldem.requestDeal(1, {from: accounts[0]})
+    it("player3 request deal river...", async function () {
+      const receipt = await this.texasHoldem.requestDeal(1, {from: accounts[3]})
       this.requestId = utils.getRequestId( receipt )
     })
 

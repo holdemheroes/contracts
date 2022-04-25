@@ -18,11 +18,12 @@ const {
 
 args
   .option("network", "The network to deal on")
+  .option("price", "new price in Eth")
 
 const flags = args.parse(process.argv)
 
 const validNetworks = [
-  "vordev", "development", "develop", "rinkeby", "mainnet", "polygon", "polygon_mumbai"
+  "rinkeby", "mainnet", "polygon", "polygon_mumbai"
 ]
 
 if (!flags.network) {
@@ -32,6 +33,11 @@ if (!flags.network) {
 
 if(!validNetworks.includes(flags.network)) {
   console.log(`Invalid network. Must be one of: ${validNetworks.join(", ")}`)
+  process.exit(1)
+}
+
+if (!flags.price) {
+  console.log("--price flag required")
   process.exit(1)
 }
 
@@ -72,7 +78,11 @@ switch(flags.network) {
 
 const url = `https://${alchemyPrefix}/${alchemyKey}`
 
-async function withdraw() {
+async function setPrice() {
+
+  const newPrice = Web3.utils.toWei(String(flags.price), "ether")
+
+  console.log(`Set new base price ${flags.price} Eth = ${newPrice.toString()} wei`)
 
   const contractAddr = contractAddresses[flags.network].holdem_heroes_nft
   const providerHttp = new HDWalletProvider(pKey, url)
@@ -83,7 +93,7 @@ async function withdraw() {
   const admin = accounts[0]
 
   contractHttp.methods
-    .withdrawETH()
+    .setBasePostRevealPrice(newPrice)
     .send({ from: admin })
     .on("transactionHash", function onTransactionHash(txHash) {
       console.log("Tx sent:", txHash)
@@ -99,4 +109,4 @@ async function withdraw() {
     })
 }
 
-withdraw()
+setPrice()

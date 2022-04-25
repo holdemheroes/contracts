@@ -20,7 +20,7 @@ module.exports = function(deployer, network) {
         break
       case "polygon":
         parentHeh = contractAddresses["mainnet"].holdem_heroes_nft
-        startIdx = 1078
+        startIdx = 759
         parentNetworkId = 1
         break
       default:

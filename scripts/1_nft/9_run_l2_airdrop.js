@@ -36,14 +36,12 @@ module.exports = async function(callback) {
       const res = {
         id: b.id,
         tx: tx.tx,
-        gas: tx.receipt.gasUsed,
       }
 
       airdrop.done_batches.push(res)
+      airdrop.last_batch_id = b.id
+      utils.writeAirdropJson(airdrop, network)
     }
-
-
-    utils.writeAirdropJson(airdrop, network)
 
   } catch(e) {
     console.log(e)

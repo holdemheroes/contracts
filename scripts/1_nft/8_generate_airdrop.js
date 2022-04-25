@@ -14,6 +14,7 @@ module.exports = async function(callback) {
   const batchSize = 50
   const tokenIds = []
   const owners = []
+  let lastBlindMintTokenId = 0
 
   const airdropDump = {
     parent: network,
@@ -30,11 +31,13 @@ module.exports = async function(callback) {
       targetNetwork = "polygon_mumbai"
       startFromBlock = 10456149	 // block contract was created
       airdropDump.parentId = 4
+      lastBlindMintTokenId = 359
       break
     case "mainnet":
       targetNetwork = "polygon"
-      startFromBlock = 0
+      startFromBlock = 14621633
       airdropDump.parentId = 1
+      lastBlindMintTokenId = 268
       break
     default:
       console.log(`${network} not supported for airdrop`)
@@ -63,27 +66,18 @@ module.exports = async function(callback) {
       for(let i = 0; i < mints.length; i += 1) {
         const m = mints[i]
         console.log(`Token #${m.returnValues.tokenId} - ${m.returnValues.to}`)
-        tokenIds.push(m.returnValues.tokenId)
-        owners.push(m.returnValues.to)
-        console.log(`${m.returnValues.to} minted #${m.returnValues.tokenId}`)
+        // only airdrop up to and including last blind mint tokenId
+        if(parseInt(m.returnValues.tokenId, 10) <= lastBlindMintTokenId) {
+          tokenIds.push(m.returnValues.tokenId)
+          owners.push(m.returnValues.to)
+          console.log(`${m.returnValues.to} blind minted #${m.returnValues.tokenId}`)
+        } else {
+          console.log(`#${m.returnValues.tokenId} was minted after reveal. Will not be airdropped.`)
+        }
       }
 
       fromBlock = toBlock
       latestBlock = await web3.eth.getBlockNumber()
-    }
-
-    const totalSupply = await holdemHeroes.totalSupply()
-
-    console.log("totalSupply", totalSupply.toString())
-
-    if(totalSupply.toNumber() < 1326) {
-      console.log("not all tokens sold. Airdrop unminted to admin wallet")
-      for(let u = 0; u < 1326; u += 1) {
-        if(!tokenIds.includes(String(u))) {
-          tokenIds.push(String(u))
-          owners.push(admin)
-        }
-      }
     }
 
     let batchId = 0
@@ -98,6 +92,7 @@ module.exports = async function(callback) {
       batchId += 1
     }
 
+    airdropDump.last_batch_id = -1
     utils.writeAirdropJson(airdropDump, targetNetwork)
 
   } catch(e) {

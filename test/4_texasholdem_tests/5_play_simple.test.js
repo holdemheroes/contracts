@@ -41,6 +41,7 @@ contract("TexasHoldemV1 - play simple single player", async function(accounts) {
 
   const notOwnToken = 5
 
+  const dealer = accounts[5]
 
   before(async function () {
 
@@ -109,6 +110,10 @@ contract("TexasHoldemV1 - play simple single player", async function(accounts) {
 
     const ts = await this.holdemHeroes.totalSupply()
     console.log(`... ${ts.toNumber()} done`)
+
+    // grant dealer role
+    const DEALER_ROLE = await this.texasHoldem.DEALER_ROLE()
+    await this.texasHoldem.grantRole(DEALER_ROLE, dealer, {from: accounts[0]})
 
     this.ROUND_1_PRICE = await this.texasHoldem.DEFAULT_ROUND_1_PRICE()
     this.ROUND_2_PRICE = await this.texasHoldem.DEFAULT_ROUND_2_PRICE()
@@ -282,8 +287,8 @@ contract("TexasHoldemV1 - play simple single player", async function(accounts) {
 
   describe('turn', function() {
 
-    it("request deal turn...", async function () {
-      const receipt = await this.texasHoldem.requestDeal(1, {from: accounts[0]})
+    it("DEALER_ROLE dealer request deal turn...", async function () {
+      const receipt = await this.texasHoldem.requestDeal(1, {from: dealer})
       this.requestId = utils.getRequestId( receipt )
     })
 
@@ -420,8 +425,8 @@ contract("TexasHoldemV1 - play simple single player", async function(accounts) {
 
   describe('river', function() {
 
-    it("request deal river...", async function () {
-      const receipt = await this.texasHoldem.requestDeal(1, {from: accounts[0]})
+    it("DEALER_ROLE dealer request deal river...", async function () {
+      const receipt = await this.texasHoldem.requestDeal(1, {from: dealer})
       this.requestId = utils.getRequestId( receipt )
     })
 

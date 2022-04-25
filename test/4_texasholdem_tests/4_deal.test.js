@@ -5,14 +5,14 @@ const {
   expectEvent,
 } = require("@openzeppelin/test-helpers")
 
-const { vorDevConfig } = require("../helpers/test_data")
+const { vorDevConfig, playTestData } = require("../helpers/test_data")
 
 const { increaseBlockTime, mineOneBlock } = require("../helpers/chain")
 const utils = require( "../helpers/utils" )
 
 const PlayingCards = artifacts.require("PlayingCards") // Loads a compiled contract
 const xFUND = artifacts.require("MockERC20")
-const HoldemHeroes = artifacts.require("HoldemHeroes") // Loads a compiled contract
+const HoldemHeroes = artifacts.require("MockHEH") // Loads a compiled contract
 const PokerHandEvaluator = artifacts.require("PokerHandEvaluator") // Loads a compiled contract
 const MockVORDeterministic = artifacts.require("MockVORDeterministic")
 const TexasHoldemV1 = artifacts.require("TexasHoldemV1")
@@ -20,9 +20,13 @@ const TexasHoldemV1 = artifacts.require("TexasHoldemV1")
 contract("TexasHoldemV1 - deal", async function(accounts) {
   const admin = accounts[0]
   const dealer = accounts[1]
+  const player = accounts[2]
   const pheSubFee = 1
   const roundTime = 10
   const maxConcurrentGames = 5
+
+  // array of token IDs safe to add in flop
+  const flopTest5HandsSucceed = [0, 1, 2, 3, 4]
 
   const flopRandomness = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
 
@@ -40,20 +44,22 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
 
-      this.holdemHeroes = await HoldemHeroes.new(
-        this.vor.address,
-        this.xfund.address,
-        this.playingCards.address,
-        saleStartBlockNum,
-        Math.floor(Date.now() / 1000) + 1,
-        5,
-        targetBlocksPerSale,
-        saleHalflife,
-        priceSpeed,
-        priceSpeedDenominator,
-        priceHalflife,
-        startingPrice
-      )
+      this.holdemHeroes = await HoldemHeroes.new(this.playingCards.address)
+
+      console.log("reveal test HEH hands")
+      for( let i = 0; i < playTestData.hands.length; i += 1) {
+        await this.holdemHeroes.setTestHand(i, playTestData.hands[i][0], playTestData.hands[i][1])
+        process.stdout.write(`.`)
+      }
+      console.log(".")
+
+      // mint
+      console.log("mint test tokens")
+      for ( let i = 0; i < flopTest5HandsSucceed.length; i += 1 ) {
+        await this.holdemHeroes.mint( flopTest5HandsSucceed[i], { from: player } )
+        process.stdout.write(".")
+      }
+      console.log(".")
 
       this.pokerHandEvaluator = await PokerHandEvaluator.new(pheSubFee)
       this.texasHoldem = await TexasHoldemV1.new(
@@ -72,7 +78,7 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       const DEALER_ROLE = await this.texasHoldem.DEALER_ROLE()
       await this.texasHoldem.grantRole(DEALER_ROLE, dealer, {from: admin})
 
-      const receipt = await this.texasHoldem.startGame()
+      const receipt = await this.texasHoldem.startGame({from: player})
       this.requestId = utils.getRequestId(receipt)
     })
 
@@ -125,12 +131,19 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       expect(gameDeck.includes(new BN(7))).to.be.equal(false)
     })
 
-    it("can request deal for turn", async function () {
+    it("any player in game can request deal for turn", async function () {
       let game = await this.texasHoldem.games(1)
       expect(game.status).to.be.bignumber.equal(new BN(2)) // GameStatus.FLOP_DEALT
 
+      const ROUND_1_PRICE = await this.texasHoldem.DEFAULT_ROUND_1_PRICE()
+
+      await this.texasHoldem.addNFTFlop( 2, 1, {
+        value: ROUND_1_PRICE,
+        from: player
+      } )
+
       await increaseBlockTime(roundTime+1)
-      const receipt = await this.texasHoldem.requestDeal(1)
+      const receipt = await this.texasHoldem.requestDeal(1, {from: player})
 
       this.requestId = utils.getRequestId(receipt)
 
@@ -175,12 +188,12 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       expect(gameDeck.includes(new BN(15))).to.be.equal(false)
     })
 
-    it("can request deal for river", async function () {
+    it("DEALER_ROLE can request deal for river", async function () {
       let game = await this.texasHoldem.games(1)
       expect(game.status).to.be.bignumber.equal(new BN(4)) // GameStatus.TURN_DEALT
 
       await increaseBlockTime(roundTime+1)
-      const receipt = await this.texasHoldem.requestDeal(1)
+      const receipt = await this.texasHoldem.requestDeal(1, {from: dealer})
 
       this.requestId = utils.getRequestId(receipt)
 
@@ -237,20 +250,7 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
-      this.holdemHeroes = await HoldemHeroes.new(
-        this.vor.address,
-        this.xfund.address,
-        this.playingCards.address,
-        saleStartBlockNum,
-        Math.floor(Date.now() / 1000) + 1,
-        5,
-        targetBlocksPerSale,
-        saleHalflife,
-        priceSpeed,
-        priceSpeedDenominator,
-        priceHalflife,
-        startingPrice
-      )
+      this.holdemHeroes = await HoldemHeroes.new(this.playingCards.address)
 
       this.pokerHandEvaluator = await PokerHandEvaluator.new(pheSubFee)
       this.texasHoldem = await TexasHoldemV1.new(
@@ -297,6 +297,13 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       expect(game.status).to.be.bignumber.equal(new BN(2)) // GameStatus.FLOP_DEALT
     })
 
+    it("cannot request deal if not in game or don't have DEALER_ROLE", async function () {
+      await expectRevert(
+        this.texasHoldem.requestDeal(1, {from: accounts[5]}),
+        "not dealer",
+      )
+    })
+
     it("cannot fulfill deal if no requestId", async function () {
       let game = await this.texasHoldem.games(1)
       expect(game.status).to.be.bignumber.equal(new BN(2)) // GameStatus.FLOP_DEALT
@@ -324,20 +331,7 @@ contract("TexasHoldemV1 - deal", async function(accounts) {
       this.xfund = await xFUND.new()
       this.vor = await MockVORDeterministic.new();
       this.playingCards = await PlayingCards.new()
-      this.holdemHeroes = await HoldemHeroes.new(
-        this.vor.address,
-        this.xfund.address,
-        this.playingCards.address,
-        saleStartBlockNum,
-        Math.floor(Date.now() / 1000) + 1,
-        5,
-        targetBlocksPerSale,
-        saleHalflife,
-        priceSpeed,
-        priceSpeedDenominator,
-        priceHalflife,
-        startingPrice
-      )
+      this.holdemHeroes = await HoldemHeroes.new(this.playingCards.address)
 
       this.pokerHandEvaluator = await PokerHandEvaluator.new( pheSubFee )
       this.texasHoldem = await TexasHoldemV1.new(

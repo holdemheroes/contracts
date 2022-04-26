@@ -54,8 +54,8 @@ module.exports = {
           providerOrUrl: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "4",
-      gas: 10000000,
-      gasPrice: 10000000000,
+      // gas: 10000000,
+      // gasPrice: 10000000000,
       skipDryRun: true,
     },
     mainnet: {
@@ -65,7 +65,7 @@ module.exports = {
           providerOrUrl: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "1",
-      gasPrice: 35000000000,
+      // gasPrice: 35000000000,
       skipDryRun: true,
     },
     polygon_mumbai: {
@@ -75,7 +75,7 @@ module.exports = {
           providerOrUrl: `https://polygon-mumbai.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "80001",
-      gasPrice: 3000000000,
+      // gasPrice: 3000000000,
       skipDryRun: true,
     },
     polygon: {
@@ -85,7 +85,7 @@ module.exports = {
           providerOrUrl: `https://polygon-mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,
         }),
       network_id: "137",
-      gasPrice: 3000000000,
+      // gasPrice: 3000000000,
     }
   },
 

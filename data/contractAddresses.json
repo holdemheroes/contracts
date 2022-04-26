@@ -38,6 +38,8 @@
     "provenance_ipfs_hash": "QmNm6vrWTSGCQ7w5XW2yKy95wd67jrv9xqvQBm5fnM51XV",
     "holdem_heroes_nft": "0xfe54470e3e7676bA20A6FF27f0358651d0525CAa",
     "xfund": "0x77a3840f78e4685afaf9c416b36e6eae6122567b",
-    "vor": "0x9e84d9DB70fb5767f7bD2A7013C189b4CA8CC374"
+    "vor": "0x9e84d9DB70fb5767f7bD2A7013C189b4CA8CC374",
+    "hand_evaluator": "0xFCbd82bF029E841D9d568FC449cd9399AdC617fd",
+    "texas_holdem_v1": "0x1ED2b5820C8BB558a99696b3C140000926Df8F2f"
   }
 }
